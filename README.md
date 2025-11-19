@@ -14,7 +14,7 @@ BondUp adalah aplikasi mobile berbasis Flutter yang menghubungkan para penggemar
 | Tsaniya Fini Ardiyanti | 2406437893 | Partner Matching |
 | Farrell Bagoes Rahmantyo | 2406420596 | Event Discovery |
 | Muhammad Arief Solomon | 2406343092 | Event Management | 
-| Gerry | 2406495464 | Review & Rating |
+| Gerry Bima Putra| 2406495464 | Review & Rating |
 
 ---
 
