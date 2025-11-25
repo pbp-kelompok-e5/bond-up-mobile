@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:bond_up_mobile/app/app_theme.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:bond_up_mobile/features/auth/presentation/screens/splash_screen.dart';
+import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
+import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
+import 'package:bond_up_mobile/core/design_system.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,11 +16,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BondUp Mobile',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const MyHomePage(title: 'BondUp Mobile'),
+    return Provider(
+      create: (_) {
+        CookieRequest request = CookieRequest();
+        return request;
+      },
+      child: MaterialApp(
+        title: 'BondUp Mobile',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const SplashScreen(),
+      ),
     );
   }
 }
@@ -51,6 +63,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> _handleLogout() async {
+    final request = context.read<CookieRequest>();
+    final authService = AuthService(request);
+
+    await authService.logout();
+
+    if (!mounted) return;
+
+    ToastUtils.showSuccess(context, 'Logged out successfully');
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -68,6 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _handleLogout,
+          ),
+        ],
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
