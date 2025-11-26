@@ -5,7 +5,7 @@ import '../services/event_service.dart';
 import '../models/event.dart';
 import 'event_form_page.dart';
 import 'participants_page.dart';
-import 'event_detail_page.dart';
+// import 'event_detail_page.dart';
 
 class MyEventsPage extends StatefulWidget {
   const MyEventsPage({super.key});
