@@ -18,6 +18,7 @@ class AppTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final bool enabled;
+  final String? Function(String?)? validator;
 
   const AppTextField({
     super.key,
@@ -35,6 +36,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.enabled = true,
+    this.validator,
   });
 
   @override
@@ -53,7 +55,7 @@ class AppTextField extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
@@ -63,6 +65,7 @@ class AppTextField extends StatelessWidget {
           onTap: onTap,
           readOnly: readOnly,
           enabled: enabled,
+          validator: validator,
           style: const TextStyle(
             color: AppColors.orangeSport,
             fontSize: 16,
