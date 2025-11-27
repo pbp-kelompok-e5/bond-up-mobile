@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
-import 'package:bond_up_mobile/main.dart';
+import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
 
 /// Splash screen that checks authentication status on app startup
 class SplashScreen extends StatefulWidget {
