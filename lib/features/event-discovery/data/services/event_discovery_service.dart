@@ -44,7 +44,5 @@ class EventDiscoveryService {
     return listEvent;
   }
 
-  // Join Event
 
-  // Leave Event
 }
