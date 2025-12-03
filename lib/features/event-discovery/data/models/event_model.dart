@@ -50,7 +50,7 @@ class Event {
     organizer: json["organizer"],
     title: json["title"],
     description: json["description"],
-    thumbnail: json["thumbnail"],
+    thumbnail: json["thumbnail"] ?? "",
     sportType: json["sport_type"],
     eventDate: DateTime.parse(json["event_date"]),
     startTime: json["start_time"],
