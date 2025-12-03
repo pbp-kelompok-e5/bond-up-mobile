@@ -34,6 +34,12 @@ class EventService {
     return res;
   }
 
+  Future<Map<String, dynamic>> cancelEvent(int id) async {
+    // Backend expects POST or PATCH. Sending an empty JSON object.
+    final res = await request.postJson("$baseApi/events/$id/cancel/", "{}");
+    return res;
+  }
+
   Future<List<Map<String, dynamic>>> fetchParticipants(int eventId) async {
     final res = await request.get("$baseApi/events/$eventId/participants/");
     return List<Map<String, dynamic>>.from(res);
