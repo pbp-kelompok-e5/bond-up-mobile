@@ -6,6 +6,9 @@ import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:bond_up_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
+import 'package:bond_up_mobile/features/partner_matching/presentation/screens/browse_users_screen.dart';
+import 'package:bond_up_mobile/features/partner_matching/logic/browse_users_provider.dart';
+import 'package:bond_up_mobile/features/partner_matching/data/datasources/partner_matching_remote_datasource.dart';
 
 /// App-wide navigation drawer
 class AppDrawer extends StatelessWidget {
@@ -30,7 +33,8 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const MyHomePage(title: 'BondUp Mobile'),
+                  builder: (context) =>
+                      const MyHomePage(title: 'BondUp Mobile'),
                 ),
                 (route) => false,
               );
@@ -44,9 +48,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context); // Close drawer
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ProfileScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
               );
             },
           ),
@@ -66,7 +68,19 @@ class AppDrawer extends StatelessWidget {
             title: 'Find Partners',
             onTap: () {
               Navigator.pop(context);
-              ToastUtils.showInfo(context, 'Find Partners feature coming soon!');
+              // ToastUtils.showInfo(context, 'Find Partners feature coming soon!');
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                final request = context.read<CookieRequest>();
+
+                return ChangeNotifierProvider(create: (context) {
+                  // Buat instance data source
+                  final dataSource =
+                      PartnerMatchingRemoteDataSource(request);
+
+                  // Buat dan kembalikan BrowseUsersProvider
+                  return BrowseUsersProvider(dataSource);
+                }, child: const BrowseUsersScreen());
+              }));
             },
           ),
           _buildDrawerItem(
@@ -105,9 +119,7 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildDrawerHeader(BuildContext context, CookieRequest request) {
     return DrawerHeader(
-      decoration: const BoxDecoration(
-        color: AppColors.deepSea,
-      ),
+      decoration: const BoxDecoration(color: AppColors.deepSea),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -115,11 +127,7 @@ class AppDrawer extends StatelessWidget {
           const CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.orangeSport,
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Colors.white,
-            ),
+            child: Icon(Icons.person, size: 40, color: Colors.white),
           ),
           const SizedBox(height: 12),
           FutureBuilder(
@@ -171,32 +179,26 @@ class AppDrawer extends StatelessWidget {
     Color? iconColor,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: iconColor ?? AppColors.orangeSport,
-      ),
+      leading: Icon(icon, color: iconColor ?? AppColors.orangeSport),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
       onTap: onTap,
       hoverColor: AppColors.deepSeaLight,
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, CookieRequest request) async {
+  Future<void> _handleLogout(
+    BuildContext context,
+    CookieRequest request,
+  ) async {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.deepSea,
-        title: const Text(
-          'Logout',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Logout', style: TextStyle(color: Colors.white)),
         content: const Text(
           'Are you sure you want to logout?',
           style: TextStyle(color: Colors.white70),
@@ -204,17 +206,11 @@ class AppDrawer extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Logout', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -232,9 +228,7 @@ class AppDrawer extends StatelessWidget {
         // Navigate to login screen
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
           (route) => false,
         );
       }
