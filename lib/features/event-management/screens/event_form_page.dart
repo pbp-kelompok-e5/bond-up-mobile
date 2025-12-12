@@ -156,9 +156,7 @@ class _EventFormPageState extends State<EventFormPage> {
                     "end_time": _endTime?.to24HourFormat(),
                     "event_date": DateFormat('yyyy-MM-dd').format(_eventDate ?? DateTime.now()),
                     "max_participants": _maxParticipants ?? 2,
-                    "status": _editing ? widget.event!.status : "upcoming",
                   };
-
                   final res = _editing
                       ? await service.updateEvent(widget.event!.id, payload)
                       : await service.createEvent(payload);
