@@ -8,7 +8,7 @@ class BrowseUsersProvider extends ChangeNotifier {
   // Constructor menerima datasource (Dependency Injection)
   BrowseUsersProvider(this.dataSource);
 
-  // --- STATE VARIABLES ---
+  // STATE VARIABLES 
   List<UserMatchModel> _users = [];
   bool _isLoading = false;
   String _errorMessage = '';
@@ -67,10 +67,10 @@ class BrowseUsersProvider extends ChangeNotifier {
     // 1. Set status jadi Loading & Beri tahu UI
     _isLoading = true;
     _errorMessage = '';
-    notifyListeners(); // <-- Ini magic word-nya, nyuruh UI nge-rebuild
+    notifyListeners(); // Update UI supaya nampilin loading spinner
 
     try {
-      // 2. Panggil Datasource ("Kurir")
+      // 2. Panggil Datasource buat ambil data
       final result = await dataSource.fetchUsers(
         query: query,
         sport: _selectedSport,

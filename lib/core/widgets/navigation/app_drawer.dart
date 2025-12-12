@@ -1,3 +1,5 @@
+import 'package:bond_up_mobile/features/partner_matching/logic/connections_provider.dart';
+import 'package:bond_up_mobile/features/partner_matching/presentation/screens/my_connections_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -78,8 +80,8 @@ class AppDrawer extends StatelessWidget {
                       PartnerMatchingRemoteDataSource(request);
 
                   // Buat dan kembalikan BrowseUsersProvider
-                  return BrowseUsersProvider(dataSource);
-                }, child: const BrowseUsersScreen());
+                  return ConnectionsProvider(dataSource);
+                }, child: const MyConnectionsScreen());
               }));
             },
           ),

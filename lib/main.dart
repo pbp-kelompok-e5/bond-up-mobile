@@ -1,3 +1,4 @@
+import 'package:bond_up_mobile/features/partner_matching/data/model/connection_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -6,8 +7,7 @@ import 'package:bond_up_mobile/features/auth/presentation/screens/splash_screen.
 
 import 'features/partner_matching/logic/browse_users_provider.dart';
 import 'features/partner_matching/data/datasources/partner_matching_remote_datasource.dart';
-// Kita tidak perlu import MyHomePage di sini kecuali jika ingin testing langsung di home:
-// import 'package:bond_up_mobile/features/home/screens/home_page.dart'; 
+import 'features/partner_matching/logic/connections_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +32,15 @@ class MyApp extends StatelessWidget {
             final request = context.read<CookieRequest>();
             return BrowseUsersProvider(
               PartnerMatchingRemoteDataSource(request),
+            );
+          },
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) {
+            final request = context.read<CookieRequest>();
+            return ConnectionsProvider(
+              PartnerMatchingRemoteDataSource(request)
             );
           },
         ),

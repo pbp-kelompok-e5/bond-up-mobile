@@ -36,7 +36,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      // Handle error (bisa tampilin snackbar/text error)
+      // Handle error (menampilkan snackbar/text error)
       setState(() => _isLoading = false);
     }
   }
@@ -52,7 +52,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final success = await dataSource.sendConnectionAction(action, widget.userId);
 
     if (success) {
-      await _loadProfile(); // Refresh data biar tombolnya berubah
+      await _loadProfile(); // Refresh data agar tombolnya berubah
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Action '$action' success!")),
@@ -96,7 +96,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       
                       const SizedBox(height: 24),
 
-                      // --- BAGIAN 2: TOMBOL AKSI (PENTING!) ---
+                      // --- BAGIAN 2: TOMBOL AKSI ---
                       if (_isActionLoading)
                         const CircularProgressIndicator()
                       else

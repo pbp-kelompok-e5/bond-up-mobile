@@ -1,12 +1,10 @@
 import 'package:bond_up_mobile/features/partner_matching/data/model/user_match_model.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-// import 'package:bond-up/core/constants.dart'; // Pastikan BASE_URL ada di sini
 import '../model/user_match_model.dart';
 import '../model/connection_model.dart';
 import '../model/profile_detail_model.dart';
 
 class PartnerMatchingRemoteDataSource {
-  // Ganti http.Client jadi CookieRequest
   final CookieRequest request;
   final String baseUrl = "http://localhost:8000";
 
@@ -27,14 +25,12 @@ class PartnerMatchingRemoteDataSource {
       'city': city,
     };
 
-    // Bikin URL lengkap dengan parameter
-    // pbp_django_auth butuh String URL, bukan Uri object
     final String url = Uri.parse('$baseUrl/partner-matching/browse-users-api/')
         .replace(queryParameters: queryParams)
         .toString();
 
     try {
-      // PENTING: request.get() langsung mengembalikan JSON (dynamic)
+      // request.get() langsung mengembalikan JSON (dynamic)
       final response = await request.get(url);
 
       // Cek apakah response valid (biasanya Map)
@@ -58,11 +54,11 @@ class PartnerMatchingRemoteDataSource {
     try {
       final response = await request.get(url);
 
-      // Langsung cek isi JSON
+      // pbp_django_auth otomatis decode JSON
       if (response['status'] == 'success') {
         return Connection.fromJson(response);
       } else {
-        throw Exception('Server error: ${response['message']}');
+        throw Exception('Gagal load connections: ${response['message']}');
       }
     } catch (e) {
       throw Exception('Error fetching connections: $e');
@@ -91,15 +87,13 @@ class PartnerMatchingRemoteDataSource {
     }
   }
 
-  // partner_matching_remote_datasource.dart
   Future<Map<String, List<Map<String, String>>>> fetchFilterOptions() async {
     final String url = '$baseUrl/partner-matching/filter-options-api/';
 
     try {
       final response = await request.get(url);
       
-      // Response udah otomatis di-decode jadi Map/List sama pbp_django_auth
-      // Kita casting biar aman
+      // Response udah otomatis di-decode jadi Map/List dengan pbp_django_auth
       return {
         'cities': List<Map<String, String>>.from(
             response['cities'].map((x) => {'value': x['value'].toString(), 'label': x['label'].toString()})
@@ -131,4 +125,6 @@ class PartnerMatchingRemoteDataSource {
       throw Exception('Error fetching profile: $e');
     }
   }
+
+  
 }

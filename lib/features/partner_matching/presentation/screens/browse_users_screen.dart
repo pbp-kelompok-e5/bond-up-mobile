@@ -20,7 +20,7 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
   void initState() {
     super.initState();
     // Panggil fetch data pertama kali saat layar dibuka
-    // Gunakan Future.microtask agar tidak error saat build belum selesai
+    // Menggunakan Future.microtask agar tidak error saat build belum selesai
     Future.microtask(() {
       context.read<BrowseUsersProvider>().searchUsers();
     });
@@ -33,7 +33,7 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
     super.dispose();
   }
 
-  // Fungsi Debounce biar gak spam API saat ngetik
+  // Fungsi Debounce biar tidak spam API saat mengetik di search bar
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -58,7 +58,7 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                isScrollControlled: true, // Biar bisa tinggi
+                isScrollControlled: true, // Agar bisa full height
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
@@ -161,12 +161,5 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
         ],
       ),
     );
-  }
-
-  // Contoh implementasi filter modal singkat
-  void _showFilterModal(BuildContext context) {
-      // Implementasi BottomSheet filter kamu di sini
-      // Saat tombol "Apply" ditekan, panggil:
-      // context.read<BrowseUsersProvider>().searchUsers(sport: 'football', city: 'Jakarta');
   }
 }
