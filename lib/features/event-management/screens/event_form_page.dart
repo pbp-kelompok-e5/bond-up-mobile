@@ -157,7 +157,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     "event_date": DateFormat('yyyy-MM-dd').format(_eventDate ?? DateTime.now()),
                     "max_participants": _maxParticipants ?? 2,
                   };
-
                   final res = _editing
                       ? await service.updateEvent(widget.event!.id, payload)
                       : await service.createEvent(payload);
@@ -208,7 +207,7 @@ class _EventFormPageState extends State<EventFormPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         decoration: InputDecoration(labelText: label),
         items: items
             .map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value)))
