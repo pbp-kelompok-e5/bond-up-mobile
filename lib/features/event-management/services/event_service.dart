@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../models/event.dart';
+import '../models/participant.dart';
 
 const String baseApi = "http://localhost:8000/event-management/api";
 
@@ -40,9 +41,10 @@ class EventService {
     return res;
   }
 
-  Future<List<Map<String, dynamic>>> fetchParticipants(int eventId) async {
+  Future<List<Participant>> fetchParticipants(int eventId) async {
     final res = await request.get("$baseApi/events/$eventId/participants/");
-    return List<Map<String, dynamic>>.from(res);
+    List data = res;
+    return data.map((e) => Participant.fromJson(e)).toList();
   }
 
   Future<Map<String, dynamic>> manageParticipant(int eventId, String action, int userId) async {

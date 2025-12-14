@@ -7,6 +7,7 @@ import '../services/event_service.dart';
 import '../models/event.dart';
 import 'event_form_page.dart';
 import 'event_detail_page.dart';
+import 'participants_page.dart';
 
 class MyEventsPage extends StatefulWidget {
   const MyEventsPage({super.key});
@@ -94,6 +95,21 @@ class _MyEventsPageState extends State<MyEventsPage> {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EventFormPage()),
+          );
+          if (created == true) {
+            _refresh();
+          }
+        },
+        label: const Text("Add Event"),
+        icon: const Icon(Icons.add),
+        backgroundColor: AppColors.orangeSport,
+        foregroundColor: AppColors.white,
       ),
     );
   }
@@ -245,10 +261,10 @@ class _MyEventsPageState extends State<MyEventsPage> {
               foregroundColor: AppColors.statusCompleted,
             ),
             onPressed: () {
-              // TODO: Implement navigation to a participants management page.
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Participants page not yet implemented."),
-              ));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ParticipantsPage(eventId: event.id)),
+              );
             },
           ),
           TextButton.icon(
