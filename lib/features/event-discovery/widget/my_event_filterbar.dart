@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:bond_up_mobile/app/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
+
 
 class FilterBarSection extends StatefulWidget {
-  const FilterBarSection({Key? key}) : super(key: key);
+  const FilterBarSection({super.key});
 
   @override
   State<FilterBarSection> createState() => _FilterBarSectionState();
@@ -11,18 +13,10 @@ class FilterBarSection extends StatefulWidget {
 
 class _FilterBarSectionState extends State<FilterBarSection> {
   // --- STATE VARIABLES ---
-
-  // 1. Event Status (Radio Button)
-  String? _selectedStatus = 'all'; // Default: upcoming
-
-  // 2. Sport Choices (Checkbox List)
+  String? _selectedStatus = 'all';
   final Set<String> _selectedSports = {};
-
-  // 3. Time Filter (Radio + Date Range)
-  String _timeFilterType = '30_days'; // '30_days' or 'custom'
+  String _timeFilterType = 'all';
   DateTimeRange? _customDateRange;
-
-  // 4. City Filter (Checkbox + Search)
   final Set<String> _selectedCities = {};
 
   @override
@@ -32,7 +26,6 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          // TOMBOL FILTER STATUS
           _FilterChipButton(
             label: _selectedStatus == 'upcoming'
                 ? 'Event Akan Datang'
@@ -43,8 +36,6 @@ class _FilterBarSectionState extends State<FilterBarSection> {
             onTap: () => _showStatusFilter(context),
           ),
           const SizedBox(width: 8),
-
-          // TOMBOL FILTER SPORT
           _FilterChipButton(
             label: _selectedSports.isEmpty
                 ? 'Semua Olahraga'
@@ -53,20 +44,12 @@ class _FilterBarSectionState extends State<FilterBarSection> {
             onTap: () => _showSportFilter(context),
           ),
           const SizedBox(width: 8),
-
-          // TOMBOL FILTER WAKTU
           _FilterChipButton(
-            label: _timeFilterType == '30_days'
-                ? '30 Hari Terakhir'
-                : _customDateRange != null
-                ? '${_customDateRange!.start.day}/${_customDateRange!.start.month} - ${_customDateRange!.end.day}/${_customDateRange!.end.month}'
-                : 'Rentang Waktu',
+            label: _getTimeFilterLabel(),
             isActive: true,
             onTap: () => _showTimeFilter(context),
           ),
           const SizedBox(width: 8),
-
-          // TOMBOL FILTER KOTA
           _FilterChipButton(
             label: _selectedCities.isEmpty
                 ? 'Semua Kota'
@@ -79,9 +62,21 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     );
   }
 
+  // Helper untuk label tombol waktu
+  String _getTimeFilterLabel() {
+    if (_timeFilterType == 'all') return 'Semua Tanggal';
+    if (_timeFilterType == '30_days') return '30 Hari Terakhir';
+    if (_customDateRange != null) {
+      final start = DateFormat('dd MMM yyyy').format(_customDateRange!.start);
+      final end = DateFormat('dd MMM yyyy').format(_customDateRange!.end);
+      return '$start - $end';
+    }
+    return 'Rentang Waktu';
+  }
+
   // --- MODAL BOTTOM SHEETS ---
 
-  // 1. MODAL STATUS (Radio Button)
+  // 1. MODAL STATUS (RadioGroup)
   void _showStatusFilter(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -97,25 +92,34 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const Text('Pilih Status Event',
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 1024),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+
                   RadioGroup<String>(
                     groupValue: _selectedStatus,
                     onChanged: (value) {
-                      setState(() => _selectedStatus = value);
-                      setModalState(() {});
-                      Navigator.pop(context);
+                      if (value != null) {
+                        setState(() => _selectedStatus = value);
+                        setModalState(() {});
+                        Navigator.pop(context);
+                      }
                     },
-                    child: const Column(
-                      children: [
+                    child: Column(
+                      children: const [
                         RadioListTile<String>(
-                          title: const Text('Upcoming Event'),
-                          value: 'upcoming',
+                          title: Text('Semua Status'),
+                          value: 'all',
+                          contentPadding: EdgeInsets.zero,
                         ),
                         RadioListTile<String>(
-                          title: const Text('Finished Event'),
+                          title: Text('Event Akan Datang (Upcoming)'),
+                          value: 'upcoming',
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        RadioListTile<String>(
+                          title: Text('Event Selesai (Finished)'),
                           value: 'finished',
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ],
                     ),
@@ -129,18 +133,18 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     );
   }
 
-  // 2. MODAL SPORT (Diperbaiki: Memastikan List Render Semua Item)
+  // 2. MODAL SPORT (Checkbox)
   void _showSportFilter(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Penting agar bisa full screen
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return DraggableScrollableSheet(
-              initialChildSize: 0.6, // Ukuran awal modal
+              initialChildSize: 0.6,
               maxChildSize: 0.9,
               minChildSize: 0.4,
               expand: false,
@@ -150,18 +154,15 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                     const Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Text('Pilih Olahraga',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                     Expanded(
                       child: ListView.builder(
                         controller: controller,
-                        // Pastikan mengambil length dari sortedSports
                         itemCount: AppConstants.sortedSports.length,
                         itemBuilder: (context, index) {
                           final sport = AppConstants.sortedSports[index];
                           final isSelected = _selectedSports.contains(sport.key);
-
                           return CheckboxListTile(
                             title: Text(sport.value),
                             value: isSelected,
@@ -189,7 +190,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     );
   }
 
-  // 3. MODAL WAKTU (Radio + Date Picker)
+  // 3. MODAL WAKTU (RadioGroup)
   void _showTimeFilter(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -205,45 +206,46 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Filter Waktu',
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
-                  RadioListTile<String>(
-                    title: const Text('30 Hari Terakhir'),
-                    value: '30_days',
-                    groupValue: _timeFilterType,
-                    onChanged: (value) {
-                      setState(() {
-                        _timeFilterType = value!;
-                        _customDateRange = null;
-                      });
-                      setModalState(() {});
-                      Navigator.pop(context);
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: Text(_customDateRange == null
-                        ? 'Pilih Rentang Tanggal'
-                        : '${_customDateRange!.start.toString().split(' ')[0]} s/d ${_customDateRange!.end.toString().split(' ')[0]}'),
-                    value: 'custom',
+
+                  RadioGroup<String>(
                     groupValue: _timeFilterType,
                     onChanged: (value) async {
-                      // Buka Date Picker
-                      final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                        initialDateRange: _customDateRange,
-                      );
-                      if (picked != null) {
+                      if (value == null) return;
+
+                      else if (value == '30_days' || value=='all') {
                         setState(() {
-                          _timeFilterType = 'custom';
-                          _customDateRange = picked;
+                          _timeFilterType = value;
+                          _customDateRange = null;
                         });
                         setModalState(() {});
-                        Navigator.pop(context); // Tutup modal setelah pilih
+                        Navigator.pop(context);
+                      } else if (value == 'custom') {
+                        _openCustomDatePickerFlow(context, setModalState);
                       }
                     },
+                    child: Column(
+                      children: [
+                        const RadioListTile<String>(
+                          title: Text('Semua Tanggal Event'),
+                          value: 'all',
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        const RadioListTile<String>(
+                          title: Text('30 Hari Terakhir'),
+                          value: '30_days',
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        RadioListTile<String>(
+                          title: Text(_customDateRange == null
+                              ? 'Pilih Rentang Tanggal'
+                              : '${DateFormat('dd/MM/yyyy').format(_customDateRange!.start)} s/d ${DateFormat('dd/MM/yyyy').format(_customDateRange!.end)}'),
+                          value: 'custom',
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -254,10 +256,9 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     );
   }
 
-  // 4. MODAL KOTA (Checkbox + Search Bar)
+  // 4. MODAL KOTA (Checkbox)
   void _showCityFilter(BuildContext context) {
     String searchQuery = "";
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -266,11 +267,8 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            // Filter list kota berdasarkan pencarian
             final filteredCities = AppConstants.sortedCities
-                .where((element) => element.value
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()))
+                .where((element) => element.value.toLowerCase().contains(searchQuery.toLowerCase()))
                 .toList();
 
             return DraggableScrollableSheet(
@@ -286,17 +284,13 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Pilih Kota',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
-                          // Input Pencarian
                           TextField(
                             decoration: InputDecoration(
                               hintText: 'Cari kota...',
                               prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                             ),
                             onChanged: (val) {
@@ -314,8 +308,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                         itemCount: filteredCities.length,
                         itemBuilder: (context, index) {
                           final city = filteredCities[index];
-                          final isSelected =
-                          _selectedCities.contains(city.key);
+                          final isSelected = _selectedCities.contains(city.key);
                           return CheckboxListTile(
                             title: Text(city.value),
                             value: isSelected,
@@ -342,19 +335,135 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       },
     );
   }
+  // --- LOGIKA DATE PICKER CUSTOM (GAYA WHEEL / SEPERTI GAMBAR) ---
+
+  // Flow: Pilih Mulai -> Pilih Selesai
+  Future<void> _openCustomDatePickerFlow(BuildContext context, StateSetter setModalState) async {
+    // Set type to 'custom' first before opening pickers
+    setState(() => _timeFilterType = 'custom');
+    setModalState(() {});
+
+    // 1. Pilih Tanggal Mulai
+    final start = await _showWheelDatePicker(
+      context,
+      title: "Mulai dari",
+      initialDate: _customDateRange?.start ?? DateTime.now(),
+    );
+    if (start == null) return; // User batal
+
+    // 2. Pilih Tanggal Selesai (Must be after start date)
+    if (!mounted) return;
+    final end = await _showWheelDatePicker(
+      context,
+      title: "Sampai tanggal",
+      initialDate: _customDateRange?.end ?? start,
+      minimumDate: start,
+    );
+
+    if (end != null) {
+      setState(() {
+        _customDateRange = DateTimeRange(start: start, end: end);
+      });
+      setModalState(() {});
+      // Tutup modal utama filter setelah selesai
+      Navigator.pop(context);
+    }
+  }
+
+  // Widget BottomSheet Picker (Wheel Style)
+  Future<DateTime?> _showWheelDatePicker(BuildContext context, {
+    required String title,
+    DateTime? initialDate,
+    DateTime? minimumDate,
+  }) {
+    DateTime tempPickedDate = initialDate ?? DateTime.now();
+
+    return showModalBottomSheet<DateTime>(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext builder) {
+        return SizedBox(
+          height: 350, // Tinggi area picker
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Tombol Close & Judul
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(null),
+                    ),
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 48), // Spacer penyeimbang layout
+                  ],
+                ),
+              ),
+
+              // Garis pemisah
+              const Divider(height: 1),
+
+              // AREA PICKER (CUPERTINO / WHEEL)
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: tempPickedDate,
+                  minimumDate: minimumDate ?? DateTime(2020),
+                  maximumDate: DateTime(2030),
+                  onDateTimeChanged: (DateTime newDate) {
+                    tempPickedDate = newDate;
+                  },
+                ),
+              ),
+
+              // Tombol PILIH (Hijau)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, // Warna hijau sesuai gambar
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(tempPickedDate);
+                    },
+                    child: const Text(
+                      'Pilih',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-// --- WIDGET TOMBOL FILTER (Styling seperti gambar) ---
+
 class _FilterChipButton extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _FilterChipButton({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
+  const _FilterChipButton({required this.label, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -364,10 +473,8 @@ class _FilterChipButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? Colors.green.shade50 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(20), // Membuat rounded
-          border: Border.all(
-            color: isActive ? Colors.green : Colors.grey.shade300,
-          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isActive ? Colors.green : Colors.grey.shade300),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -380,14 +487,11 @@ class _FilterChipButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: 18,
-              color: isActive ? Colors.green.shade700 : Colors.black54,
-            ),
+            Icon(Icons.keyboard_arrow_down, size: 18, color: isActive ? Colors.green.shade700 : Colors.black54),
           ],
         ),
       ),
     );
   }
 }
+
