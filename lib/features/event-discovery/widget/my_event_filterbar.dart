@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/cupertino.dart';
-
 
 class FilterBarSection extends StatefulWidget {
   const FilterBarSection({super.key});
@@ -337,123 +335,49 @@ class _FilterBarSectionState extends State<FilterBarSection> {
   }
   // --- LOGIKA DATE PICKER CUSTOM (GAYA WHEEL / SEPERTI GAMBAR) ---
 
-  // Flow: Pilih Mulai -> Pilih Selesai
-  Future<void> _openCustomDatePickerFlow(BuildContext context, StateSetter setModalState) async {
-    // Set type to 'custom' first before opening pickers
-    setState(() => _timeFilterType = 'custom');
-    setModalState(() {});
+  // Flow: Menggunakan showDateRangePicker bawaan Flutter
+  Future<void> _openCustomDatePickerFlow(
+      BuildContext context, StateSetter setModalState) async {
 
-    // 1. Pilih Tanggal Mulai
-    final start = await _showWheelDatePicker(
-      context,
-      title: "Mulai dari",
-      initialDate: _customDateRange?.start ?? DateTime.now(),
-    );
-    if (start == null) return; // User batal
-
-    // 2. Pilih Tanggal Selesai (Must be after start date)
-    if (!mounted) return;
-    final end = await _showWheelDatePicker(
-      context,
-      title: "Sampai tanggal",
-      initialDate: _customDateRange?.end ?? start,
-      minimumDate: start,
-    );
-
-    if (end != null) {
-      setState(() {
-        _customDateRange = DateTimeRange(start: start, end: end);
-      });
-      setModalState(() {});
-      // Tutup modal utama filter setelah selesai
-      Navigator.pop(context);
-    }
-  }
-
-  // Widget BottomSheet Picker (Wheel Style)
-  Future<DateTime?> _showWheelDatePicker(BuildContext context, {
-    required String title,
-    DateTime? initialDate,
-    DateTime? minimumDate,
-  }) {
-    DateTime tempPickedDate = initialDate ?? DateTime.now();
-
-    return showModalBottomSheet<DateTime>(
+    // Tampilkan Full Screen Date Range Picker
+    final DateTimeRange? pickedRange = await showDateRangePicker(
       context: context,
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext builder) {
-        return SizedBox(
-          height: 350, // Tinggi area picker
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header: Tombol Close & Judul
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(null),
-                    ),
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 48), // Spacer penyeimbang layout
-                  ],
-                ),
+      initialDateRange: _customDateRange,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      // Builder untuk mengubah tema warna agar sesuai (Hijau)
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.green, // Warna Header & Seleksi
+              onPrimary: Colors.white, // Warna Teks di Header
+              onSurface: Colors.black, // Warna Teks Tanggal
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.green, // Warna tombol Cancel/Save
               ),
-
-              // Garis pemisah
-              const Divider(height: 1),
-
-              // AREA PICKER (CUPERTINO / WHEEL)
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: tempPickedDate,
-                  minimumDate: minimumDate ?? DateTime(2020),
-                  maximumDate: DateTime(2030),
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempPickedDate = newDate;
-                  },
-                ),
-              ),
-
-              // Tombol PILIH (Hijau)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Warna hijau sesuai gambar
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop(tempPickedDate);
-                    },
-                    child: const Text(
-                      'Pilih',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
+          child: child!,
         );
       },
     );
+
+    // Jika user memilih tanggal (tidak cancel)
+    if (pickedRange != null) {
+      setState(() {
+        _timeFilterType = 'custom';
+        _customDateRange = pickedRange;
+      });
+
+      // Update tampilan modal bottom sheet (agar radio button 'custom' terupdate teksnya)
+      setModalState(() {});
+
+      // Opsi: Langsung tutup bottom sheet setelah memilih tanggal agar user langsung lihat hasil filter
+      Navigator.pop(context);
+    }
   }
 }
 
