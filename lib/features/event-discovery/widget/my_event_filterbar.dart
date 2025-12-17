@@ -30,7 +30,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                 : _selectedStatus == 'finished'
                 ? 'Event Selesai'
                 : 'Semua Status',
-            isActive: true,
+            isActive: _selectedStatus == 'all' ? false : true,
             onTap: () => _showStatusFilter(context),
           ),
           const SizedBox(width: 8),
@@ -44,7 +44,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
           const SizedBox(width: 8),
           _FilterChipButton(
             label: _getTimeFilterLabel(),
-            isActive: true,
+            isActive: _timeFilterType == 'all' ? false : true,
             onTap: () => _showTimeFilter(context),
           ),
           const SizedBox(width: 8),
@@ -396,7 +396,7 @@ class _FilterChipButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.green.shade50 : Colors.grey.shade100,
+          color: isActive ? Colors.green.shade50 : Colors.grey.shade100, // TODO UPDATE
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isActive ? Colors.green : Colors.grey.shade300),
         ),

@@ -44,5 +44,43 @@ class EventDiscoveryService {
     return listEvent;
   }
 
+  // POST Join Request
+  Future<bool> joinEvent(int eventId) async {
+    try {
+      final response = await request.post(
+          '$baseUrl/event_discovery/events/$eventId/join',
+          {} // Empty body, ID is in the URL
+      );
 
+      // Check message from views.py: return JsonResponse({'message': 'Joined'}, status=201)
+      if (response['message'] == 'Joined') {
+        return true;
+      } else {
+        // Handle 'Event is full' or 'Could not join'
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // DEL Leave Request
+  Future<bool> leaveEvent(int eventId) async {
+    try {
+      // Using POST as this modifies server state, even though it deletes a record
+      final response = await request.post(
+          '$baseUrl/event_discovery/events/$eventId/leave',
+          {}
+      );
+
+      // Check message from views.py: return JsonResponse({'message': 'Left'}, status=201)
+      if (response['message'] == 'Left') {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 }
