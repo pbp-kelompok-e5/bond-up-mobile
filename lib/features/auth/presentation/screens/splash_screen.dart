@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
@@ -27,8 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    final request = context.read<CookieRequest>();
-    final authService = AuthService(request);
+    final authService = context.read<AuthService>();
 
     // Check if user is logged in
     final isLoggedIn = await authService.isLoggedIn();
