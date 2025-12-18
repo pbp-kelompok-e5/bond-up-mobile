@@ -91,17 +91,19 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.deepSea,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   // Logo or App Name
                   Text(
                     'BondUp',
@@ -115,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Find Your Sports Partner',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.gray600,
+                          color: AppColors.white.withValues(alpha: 0.8),
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -126,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _usernameController,
                     label: 'Username',
                     hint: 'Enter your username',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    prefixIcon: const Icon(Icons.person_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your username';
@@ -142,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Password',
                     hint: 'Enter your password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -169,7 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         "Don't have an account? ",
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.white,
+                            ),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -190,7 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
