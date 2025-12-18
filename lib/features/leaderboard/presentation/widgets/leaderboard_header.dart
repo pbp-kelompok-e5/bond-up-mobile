@@ -14,50 +14,123 @@ class LeaderboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DeepSeaCard(
-      body: Column(
-        children: [
-          const Icon(
-            Icons.emoji_events,
-            size: 48,
-            color: Color(0xFFFFD700),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Top Players',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      body: SizedBox(
+        width: double.infinity, 
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 1. TROPHY DENGAN EFEK GLOW
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.emoji_events_rounded,
+                  size: 64,
+                  color: Color(0xFFFFD700),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$totalUsers players ranked',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
-          if (currentUserRank != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.orangeSport.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.orangeSport),
+            
+            const SizedBox(height: 16),
+            
+            const Text(
+              'LEADERBOARD',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
               ),
-              child: Text(
-                'Your Rank: #$currentUserRank',
-                style: const TextStyle(
-                  color: AppColors.orangeSport,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            ),
+            
+            const SizedBox(height: 4),
+            
+            Text(
+              'Competing against $totalUsers players',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 13,
+              ),
+            ),
+
+            if (currentUserRank != null) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.orangeSport.withValues(alpha: 0.2),
+                      AppColors.orangeSport.withValues(alpha: 0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: AppColors.orangeSport.withValues(alpha: 0.5), 
+                    width: 1.5
+                  ),
+                  boxShadow: [
+                     BoxShadow(
+                        color: AppColors.orangeSport.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                  ]
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star, 
+                      size: 16, 
+                      color: AppColors.orangeSport
+                    ),
+                    const SizedBox(width: 8),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'Your Rank: ',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '#$currentUserRank',
+                            style: const TextStyle(
+                              color: AppColors.orangeSport,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
+            const SizedBox(height: 8),
           ],
-        ],
+        ),
       ),
     );
   }
