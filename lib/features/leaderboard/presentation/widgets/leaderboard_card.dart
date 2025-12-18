@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/leaderboard/data/models/leaderboard_entry_model.dart';
-import 'package:bond_up_mobile/features/leaderboard/presentation/widgets/ranking_tier_badge.dart'; // Pastikan path ini benar
+import 'package:bond_up_mobile/features/leaderboard/presentation/widgets/ranking_tier_badge.dart';
 import 'rank_badge.dart';
 
 class LeaderboardCard extends StatelessWidget {
@@ -18,58 +18,48 @@ class LeaderboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Logic warna dipindah ke sini agar build method bersih
-    Color? cardGradientStart;
-    Color? cardGradientEnd;
+    final Color rankColor = _getRankColor(user.rank);
+    final bool isTopThree = user.rank <= 3;
 
-    if (user.rank == 1) {
-      cardGradientStart = const Color(0xFFFFD700).withOpacity(0.15);
-      cardGradientEnd = const Color(0xFFFFD700).withOpacity(0.05);
-    } else if (user.rank == 2) {
-      cardGradientStart = const Color(0xFFC0C0C0).withOpacity(0.15);
-      cardGradientEnd = const Color(0xFFC0C0C0).withOpacity(0.05);
-    } else if (user.rank == 3) {
-      cardGradientStart = const Color(0xFFCD7F32).withOpacity(0.15);
-      cardGradientEnd = const Color(0xFFCD7F32).withOpacity(0.05);
+    // Gradient Background Logic
+    LinearGradient? backgroundGradient;
+    if (isTopThree) {
+      backgroundGradient = LinearGradient(
+        colors: [
+          rankColor.withValues(alpha: 0.15),
+          rankColor.withValues(alpha: 0.05),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
     }
 
-    Color pointsColor = user.rank <= 3
-        ? (user.rank == 1
-            ? const Color(0xFFFFD700)
-            : user.rank == 2
-                ? const Color(0xFFC0C0C0)
-                : const Color(0xFFCD7F32))
-        : AppColors.orangeSport;
+    // Border Logic
+    Color borderColor = Colors.transparent;
+    if (isCurrentUser) {
+      borderColor = AppColors.orangeSport;
+    } else if (isTopThree) {
+      borderColor = rankColor.withValues(alpha: 0.3);
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        gradient: cardGradientStart != null
-            ? LinearGradient(
-                colors: [cardGradientStart, cardGradientEnd!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: cardGradientStart == null
-            ? (isCurrentUser
-                ? AppColors.orangeSport.withOpacity(0.15)
-                : AppColors.deepSeaLight)
-            : null,
+        color: isCurrentUser
+            ? AppColors.orangeSport.withValues(alpha: 0.1)
+            : AppColors.deepSeaLight,
+        gradient: backgroundGradient,
         borderRadius: BorderRadius.circular(16),
-        border: isCurrentUser
-            ? Border.all(color: AppColors.orangeSport, width: 2.5)
-            : (user.rank <= 3
-                ? Border.all(
-                    color: pointsColor,
-                    width: 2,
-                  )
-                : null),
-        boxShadow: user.rank <= 3 || isCurrentUser
+        border: Border.all(
+          color: borderColor,
+          width: isCurrentUser ? 2 : 1,
+        ),
+        boxShadow: isTopThree || isCurrentUser
             ? [
                 BoxShadow(
-                  color: pointsColor.withOpacity(0.3),
-                  blurRadius: 8,
+                  color: (isCurrentUser ? AppColors.orangeSport : rankColor)
+                      .withValues(alpha: 0.1),
+                  blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ]
@@ -81,57 +71,62 @@ class LeaderboardCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(12), // Padding sedikit dikecilkan untuk layar sempit
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
+                // 1. RANK BADGE
                 RankBadge(rank: user.rank),
-                const SizedBox(width: 12),
                 
-                // Avatar
-                Hero(
-                  tag: 'profile_${user.userId}',
-                  child: CircleAvatar(
-                    radius: 28, // Sedikit dikecilkan agar muat di layar kecil
-                    backgroundColor: AppColors.deepSea,
-                    backgroundImage: user.profileImageUrl.isNotEmpty
-                        ? NetworkImage(user.profileImageUrl)
-                        : null,
-                    child: user.profileImageUrl.isEmpty
-                        ? const Icon(Icons.person, color: Colors.white54, size: 28)
+                const SizedBox(width: 14),
+
+                // 2. AVATAR (Dengan Ring untuk Top 3)
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: isTopThree
+                        ? Border.all(color: rankColor, width: 2)
                         : null,
                   ),
+                  child: Hero(
+                    tag: 'profile_${user.userId}',
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: AppColors.deepSea,
+                      backgroundImage: user.profileImageUrl.isNotEmpty
+                          ? NetworkImage(user.profileImageUrl)
+                          : null,
+                      child: user.profileImageUrl.isEmpty
+                          ? const Icon(Icons.person, color: Colors.white54, size: 24)
+                          : null,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                
-                // User Info - Menggunakan Expanded agar mengisi ruang sisa
+
+                const SizedBox(width: 14),
+
+                // 3. USER INFO (Hanya Nama & Tier)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Nama User
                       Row(
                         children: [
-                          Flexible( // Flexible penting untuk nama panjang
+                          Flexible(
                             child: Text(
                               user.fullName,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 16, // Font size responsif
-                                fontWeight: FontWeight.bold,
-                                shadows: user.rank <= 3
-                                    ? [
-                                        Shadow(
-                                          color: Colors.black.withOpacity(0.3),
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ]
-                                    : null,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          // Label YOU
                           if (isCurrentUser) ...[
                             const SizedBox(width: 6),
                             Container(
@@ -141,13 +136,13 @@ class LeaderboardCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.orangeSport,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(6),
                               ),
                               child: const Text(
                                 'YOU',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -155,61 +150,39 @@ class LeaderboardCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '@${user.username}',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          RankingTierBadge(
-                            tier: user.tier,
-                            badge: user.badge,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              '${user.totalEvents} events',
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                      
+                      const SizedBox(height: 6), // Spasi sedikit diperbesar
+
+                      // Tier Badge (Sekarang sendiri di baris kedua)
+                      RankingTierBadge(
+                        tier: user.tier,
+                        badge: user.badge,
+                        size: 14,
                       ),
                     ],
                   ),
                 ),
-                
-                const SizedBox(width: 8),
-                
-                // Points Column
+
+                // 4. POINTS DISPLAY
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       '${user.totalPoints}',
                       style: TextStyle(
-                        color: pointsColor,
-                        fontSize: 22, // Ukuran font disesuaikan
-                        fontWeight: FontWeight.bold,
+                        color: isTopThree ? rankColor : AppColors.orangeSport,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    const Text(
-                      'pts', // Disingkat agar hemat tempat
+                    Text(
+                      'PTS',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 10,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -220,5 +193,14 @@ class LeaderboardCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getRankColor(int rank) {
+    switch (rank) {
+      case 1: return const Color(0xFFFFD700); // Gold
+      case 2: return const Color(0xFFC0C0C0); // Silver
+      case 3: return const Color(0xFFCD7F32); // Bronze
+      default: return AppColors.orangeSport;
+    }
   }
 }
