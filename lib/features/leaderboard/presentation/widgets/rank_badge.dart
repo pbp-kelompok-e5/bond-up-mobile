@@ -30,18 +30,18 @@ class RankBadge extends StatelessWidget {
       fontSize = 17;
     }
 
-    // Menggunakan ConstrainedBox agar tidak layout break di layar sangat kecil
+    // Wrap dengan ConstrainedBox agar tidak layout break di layar sangat kecil
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.2),
+        color: badgeColor.withValues(alpha: 0.2),
         shape: BoxShape.circle,
         border: Border.all(color: badgeColor, width: 2.5),
         boxShadow: rank <= 3
             ? [
                 BoxShadow(
-                  color: badgeColor.withOpacity(0.4),
+                  color: badgeColor.withValues(alpha: 0.4),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -58,7 +58,7 @@ class RankBadge extends StatelessWidget {
             shadows: rank <= 3
                 ? [
                     Shadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       offset: const Offset(0, 1),
                       blurRadius: 2,
                     ),
