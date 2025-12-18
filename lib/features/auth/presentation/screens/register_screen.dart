@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.deepSea,
       appBar: AppBar(
         title: const Text('Register'),
         leading: IconButton(
@@ -107,13 +107,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   // Title
                   Text(
                     'Create Account',
@@ -127,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Join BondUp and find your sports partner',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.gray600,
+                          color: AppColors.white.withValues(alpha: 0.8),
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -138,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _usernameController,
                     label: 'Username',
                     hint: 'Choose a username',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    prefixIcon: const Icon(Icons.person_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a username';
@@ -157,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Password',
                     hint: 'Create a password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a password';
@@ -176,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Confirm Password',
                     hint: 'Re-enter your password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please confirm your password';
@@ -203,7 +205,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         'Already have an account? ',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.white,
+                            ),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -219,7 +223,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ],
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
