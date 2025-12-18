@@ -275,29 +275,30 @@ class _EventDetailPageState extends State<EventDetailPage> {
     required String title,
     required String content,
     String confirmText = "Confirm",
+    bool isDestructive = true,
   }) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.deepSeaLight,
-        title: Text(title, style: const TextStyle(color: AppColors.white)),
-        content: Text(content, style: const TextStyle(color: AppColors.gray300)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("No", style: TextStyle(color: AppColors.gray300)),
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.deepSeaLight,
+            title: Text(title, style: const TextStyle(color: AppColors.white)),
+            content: Text(content, style: const TextStyle(color: AppColors.gray300)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text("No", style: TextStyle(color: AppColors.gray300)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: TextButton.styleFrom(
+                  backgroundColor: isDestructive ? AppColors.buttonDanger : AppColors.orangeSport,
+                  foregroundColor: AppColors.white,
+                ),
+                child: Text(confirmText),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.buttonDanger,
-              foregroundColor: AppColors.white,
-            ),
-            child: Text(confirmText),
-          ),
-        ],
-      ),
-    ) ??
+        ) ??
         false;
   }
 }
