@@ -129,31 +129,26 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
 
   Widget _buildStatusChip(String status) {
     Color chipColor;
-    Color textColor;
     String label = status.replaceAll('_', ' ').toUpperCase();
 
     switch (status) {
       case 'approved':
         chipColor = AppColors.statusActiveBackground;
-        textColor = AppColors.statusActive;
         break;
       case 'attended':
         chipColor = AppColors.statusCompletedBackground;
-        textColor = AppColors.statusCompleted;
         break;
       case 'pending':
         chipColor = AppColors.toastWarningEnd.withOpacity(0.2);
-        textColor = AppColors.toastWarningEnd;
         break;
       default:
         chipColor = AppColors.gray200;
-        textColor = AppColors.gray700;
     }
 
     return Chip(
       label: Text(label),
-      labelStyle: TextStyle(
-        color: textColor,
+      labelStyle: const TextStyle(
+        color: AppColors.deepSea,
         fontWeight: FontWeight.bold,
         fontSize: 10,
       ),

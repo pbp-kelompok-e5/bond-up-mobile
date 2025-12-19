@@ -145,6 +145,28 @@ class _EventFormPageState extends State<EventFormPage> {
                   if (!_formKey.currentState!.validate()) return;
                   _formKey.currentState!.save();
 
+                  if (_eventDate != null &&
+                      _startTime != null &&
+                      DateUtils.dateOnly(_eventDate!).isAtSameMomentAs(DateUtils.dateOnly(DateTime.now()))) {
+                    final now = TimeOfDay.now();
+                    if (_startTime!.hour < now.hour || (_startTime!.hour == now.hour && _startTime!.minute <= now.minute)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Cannot create an event in the past.")),
+                      );
+                      return;
+                    }
+                  }
+
+                  if (_startTime != null && _endTime != null) {
+                    if (_endTime!.hour < _startTime!.hour ||
+                        (_endTime!.hour == _startTime!.hour && _endTime!.minute <= _startTime!.minute)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("End time must be after start time.")),
+                      );
+                      return;
+                    }
+                  }
+
                   final payload = {
                     "title": _title,
                     "description": _description,
@@ -235,7 +257,7 @@ class _EventFormPageState extends State<EventFormPage> {
           final pickedDate = await showDatePicker(
             context: context,
             initialDate: _eventDate ?? DateTime.now(),
-            firstDate: DateTime.now(),
+            firstDate: DateUtils.dateOnly(DateTime.now()),
             lastDate: DateTime(2101),
           );
           if (pickedDate != null) {

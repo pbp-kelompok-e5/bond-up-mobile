@@ -205,10 +205,8 @@ class _MyEventsPageState extends State<MyEventsPage> {
                   ),
                 ],
               ),
-              if (!isPast) ...[
-                const Divider(height: 24, color: AppColors.deepSeaLighter),
-                _buildActionButtons(event),
-              ]
+              const Divider(height: 24, color: AppColors.deepSeaLighter),
+              _buildActionButtons(event, isPast: isPast),
             ],
           ),
         ),
@@ -218,13 +216,14 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
   Widget _buildStatusChip(String status) {
     Color chipColor;
+    Color textColor = AppColors.deepSea;
     String chipText = status.toUpperCase();
 
     switch (status.toLowerCase()) {
       case 'upcoming':
       case 'open':
         chipColor = AppColors.statusActiveBackground;
-        chipText = 'UPCOMING';
+        chipText = status.toUpperCase();
         break;
       case 'cancelled':
         chipColor = AppColors.statusCancelledBackground;
@@ -238,8 +237,8 @@ class _MyEventsPageState extends State<MyEventsPage> {
 
     return Chip(
       label: Text(chipText),
-      labelStyle: const TextStyle(
-        color: AppColors.white,
+      labelStyle: TextStyle(
+        color: textColor, // Use the new textColor variable
         fontWeight: FontWeight.bold,
         fontSize: 10,
       ),
@@ -249,11 +248,11 @@ class _MyEventsPageState extends State<MyEventsPage> {
     );
   }
 
-  Widget _buildActionButtons(Event event) {
+  Widget _buildActionButtons(Event event, {bool isPast = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (event.status.toLowerCase() == "open") ...[
+        if (!isPast && event.status.toLowerCase() == "open") ...[
           TextButton.icon(
             icon: const Icon(Icons.people, size: 16),
             label: const Text("Participants"),

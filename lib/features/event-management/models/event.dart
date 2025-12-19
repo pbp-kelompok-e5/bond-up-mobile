@@ -14,6 +14,7 @@ class Event {
     required this.currentParticipants,
     required this.status,
     required this.organizerUsername,
+    this.isJoined,
   });
 
   int id;
@@ -30,6 +31,7 @@ class Event {
   int currentParticipants;
   String status;
   String organizerUsername;
+  bool? isJoined;
 
   factory Event.fromJson(Map<String, dynamic> json) => Event(
         id: json['id'],
@@ -46,6 +48,7 @@ class Event {
         currentParticipants: int.parse(json['current_participants'].toString()),
         status: json['status'] ?? '',
         organizerUsername: json['organizer'] ?? 'Unknown',
+        isJoined: json['is_joined'] ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -63,5 +66,6 @@ class Event {
         "current_participants": currentParticipants,
         "status": status,
         "organizer": organizerUsername,
+        "is_joined": isJoined,
       };
 }

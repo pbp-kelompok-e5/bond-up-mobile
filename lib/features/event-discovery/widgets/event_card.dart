@@ -91,7 +91,7 @@ class EventCard extends StatelessWidget {
       case 'upcoming':
       case 'open':
         chipColor = AppColors.statusActiveBackground;
-        chipText = 'UPCOMING';
+        chipText = status.toUpperCase();
         break;
       case 'cancelled':
         chipColor = AppColors.statusCancelledBackground;
@@ -106,7 +106,7 @@ class EventCard extends StatelessWidget {
     return Chip(
       label: Text(chipText),
       labelStyle: const TextStyle(
-        color: AppColors.white,
+        color: AppColors.deepSea,
         fontWeight: FontWeight.bold,
         fontSize: 10,
       ),

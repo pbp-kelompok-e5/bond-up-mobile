@@ -229,6 +229,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
       case 'upcoming':
         statusColor = AppColors.statusActive;
         break;
+      case 'open':
+        statusColor = AppColors.statusActive;
+        break;
       case 'cancelled':
         statusColor = AppColors.statusCancelled;
         break;
