@@ -17,7 +17,7 @@ class EventDiscoveryService {
 
   // Fetch Event List For Event Discovery Page
   Future<List<Event>> fetchEvents(CookieRequest request) async {
-    final response = await request.get('$baseUrl/event_discovery/events/json/');
+    final response = await request.get('$baseUrl/event_discovery/events/json');
     var data = response;
     // Convert JSON to Event Models
     List<Event> listEvent = [];
@@ -32,7 +32,7 @@ class EventDiscoveryService {
   // Fetch Event List For My Event Discovery Page
   Future<List<Event>> fetchMyEvents(CookieRequest request) async {
     final response = await request.get(
-        '$baseUrl/event_discovery/events/my-joined/json/');
+        '$baseUrl/event_discovery/events/my-joined/json');
     var data = response;
     // Convert JSON to Event Models
     List<Event> listEvent = [];
