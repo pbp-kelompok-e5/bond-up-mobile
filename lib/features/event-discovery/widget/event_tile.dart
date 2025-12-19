@@ -4,10 +4,14 @@ import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+
 class EventCard extends StatelessWidget {
   final Event event;
+  final VoidCallback onTap;
 
-  const EventCard({Key? key, required this.event}) : super(key: key);
+  const EventCard(
+      {Key? key, required this.event, required this.onTap}) : super(key: key)
+  ;
 
   @override
   Widget build(BuildContext context) {
@@ -22,116 +26,119 @@ class EventCard extends StatelessWidget {
         color: colorScheme.secondary,
         borderRadius: BorderRadius.circular(20), // Sudut membulat container utama
       ),
-      child: Row(
-        children: [
-          // 1. BAGIAN GAMBAR (KIRI)
-          _buildImageSection(),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          children: [
+            // 1. BAGIAN GAMBAR (KIRI)
+            _buildImageSection(),
 
-          const SizedBox(width: 16), // Spasi antar gambar dan teks
+            const SizedBox(width: 16), // Spasi antar gambar dan teks
 
-          // 2. BAGIAN INFORMASI (KANAN)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Judul Event
-                Text(
-                  event.title.toUpperCase(),
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                // Garis Bawah (Divider)
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  height: 2,
-                  width: double.infinity,
-                  color: colorScheme.primary,
-                ),
-
-                // Row untuk Status dan Tanggal
-                Row(
-                  children: [
-                    // Chip Status
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        event.status, // Data status
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Tanggal Event
-                    Text(
-                      _formatDate(event.eventDate),
-                      style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Row untuk Kota
-                Row(
-                  children: [
-                    // Ikon Lokasi (Icons.location_on)
-                    Icon(
-                      Icons.location_on, // Menggunakan Icons.location_on
-                      size: 16,
-                      color: colorScheme.primary, // Memberikan warna oranye sesuai desain
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        event.city.toUpperCase(), // Data kota
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Chip Sport Type (Paling bawah)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    event.sportType.toUpperCase(), // Data tipe olahraga
-                    style: const TextStyle(
-                      color: Colors.white,
+            // 2. BAGIAN INFORMASI (KANAN)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Judul Event
+                  Text(
+                    event.title.toUpperCase(),
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  // Garis Bawah (Divider)
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    height: 2,
+                    width: double.infinity,
+                    color: colorScheme.primary,
+                  ),
+
+                  // Row untuk Status dan Tanggal
+                  Row(
+                    children: [
+                      // Chip Status
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          event.status, // Data status
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Tanggal Event
+                      Text(
+                        _formatDate(event.eventDate),
+                        style: TextStyle(
+                            color: colorScheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Row untuk Kota
+                  Row(
+                    children: [
+                      // Ikon Lokasi (Icons.location_on)
+                      Icon(
+                        Icons.location_on, // Menggunakan Icons.location_on
+                        size: 16,
+                        color: colorScheme.primary, // Memberikan warna oranye sesuai desain
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          event.city.toUpperCase(), // Data kota
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Chip Sport Type (Paling bawah)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      event.sportType.toUpperCase(), // Data tipe olahraga
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 

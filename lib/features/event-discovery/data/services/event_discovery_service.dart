@@ -83,4 +83,24 @@ class EventDiscoveryService {
       return false;
     }
   }
+
+  // GET Participant Status
+  Future<String> getParticipantStatus(int eventId) async {
+    try {
+      // The endpoint defined in urls.py is events/<id>/participant-status/
+      final response = await request.get(
+        '$baseUrl/event_discovery/events/$eventId/participant-status/',
+      );
+
+      // The Django view returns: {'status': '...'}
+      if (response != null && response['status'] != null) {
+        return response['status'];
+      }
+
+      return 'not_participating';
+    } catch (e) {
+      // Fallback in case of error (e.g., not logged in or network issue)
+      return 'not_participating';
+    }
+  }
 }
