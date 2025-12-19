@@ -5,7 +5,11 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 // Import model dan service kamu
 import 'package:bond_up_mobile/features/leaderboard/data/services/leaderboard_service.dart';
+import 'package:bond_up_mobile/features/leaderboard/data/models/leaderboard_entry_model.dart'; // Untuk referensi tipe jika perlu
+import 'package:bond_up_mobile/features/leaderboard/data/models/points_dashboard_model.dart';
+import 'package:bond_up_mobile/features/leaderboard/data/models/points_history_model.dart';
 
+// Annotation ini akan memerintahkan build_runner membuat file mock
 @GenerateMocks([CookieRequest])
 import 'leaderboard_service_test.mocks.dart';
 
@@ -64,16 +68,16 @@ void main() {
     final tDashboardJson = {
       'status': true,
       'message': 'Success',
-      'data': <String, dynamic>{ 
+      'data': {
         'total_points': 100,
-        'breakdown': <String, dynamic>{},
+        'breakdown': {},
         'recent_achievements': []
       }
     };
 
     test('should return PointsDashboardResponseModel when API call is successful', () async {
       // Arrange
-      when(mockRequest.get(any))
+      when(mockRequest.get(argThat(contains('/points/dashboard/'))))
           .thenAnswer((_) async => tDashboardJson);
 
       // Act
@@ -82,6 +86,7 @@ void main() {
       // Assert
       expect(result.status, true);
       expect(result.data?.totalPoints, 100);
+      verify(mockRequest.get(argThat(contains('/points/dashboard/')))).called(1);
     });
 
     test('should return error model when API call throws exception', () async {
@@ -97,6 +102,7 @@ void main() {
       expect(result.data, isNull);
     });
   });
+
   // --- Group: Get Points History ---
   group('getPointsHistory', () {
     final tHistoryJson = {
