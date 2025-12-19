@@ -10,9 +10,8 @@ class AuthService {
   // For Android emulator: http://10.0.2.2:8000
   // For web/Chrome: http://localhost:8000
   // For production: https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id
-  // static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id/';
-  static const String baseUrl = 'http://localhost:8000';
-
+  static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id/';
+  
   final CookieRequest request;
 
   AuthService(this.request);
@@ -25,7 +24,7 @@ class AuthService {
   ) async {
     try {
       final response = await request.postJson(
-        '$baseUrl/auth/flutter/register/', // Changed to Flutter endpoint
+        '$baseUrl/auth/flutter/register/',  // Changed to Flutter endpoint
         jsonEncode({
           'username': username,
           'password1': password1,
@@ -46,7 +45,7 @@ class AuthService {
   Future<AuthResponse> login(String username, String password) async {
     try {
       final response = await request.postJson(
-        '$baseUrl/auth/flutter/login/', // Changed to Flutter endpoint
+        '$baseUrl/auth/flutter/login/',  // Changed to Flutter endpoint
         jsonEncode({
           'username': username,
           'password': password,
@@ -73,10 +72,10 @@ class AuthService {
   Future<bool> logout() async {
     try {
       final response = await request.postJson(
-        '$baseUrl/auth/flutter/logout/', // Changed to Flutter endpoint
+        '$baseUrl/auth/flutter/logout/',  // Changed to Flutter endpoint
         jsonEncode({}),
       );
-
+      
       await _clearUserData();
       return response['status'] ?? true;
     } catch (e) {
@@ -97,7 +96,7 @@ class AuthService {
   Future<UserModel?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
     final username = prefs.getString('username');
-
+    
     if (username != null) {
       return UserModel(username: username);
     }
