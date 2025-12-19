@@ -2,20 +2,49 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
 
-class FilterBarSection extends StatefulWidget {
-  const FilterBarSection({super.key});
+// Class untuk menampung state filter
+class FilterData {
+  final String status;
+  final Set<String> sports;
+  final String timeType;
+  final DateTimeRange? customDateRange;
+  final Set<String> cities;
 
+  FilterData({
+    required this.status,
+    required this.sports,
+    required this.timeType,
+    this.customDateRange,
+    required this.cities,
+  });
+}
+
+class FilterBarSection extends StatefulWidget {
+  final Function(FilterData) onFilterChanged; // Callback ke parent
+
+  const FilterBarSection({super.key, required this.onFilterChanged});
   @override
   State<FilterBarSection> createState() => _FilterBarSectionState();
 }
 
 class _FilterBarSectionState extends State<FilterBarSection> {
   // --- STATE VARIABLES ---
-  String? _selectedStatus = 'all';
+  String _selectedStatus = 'all';
   final Set<String> _selectedSports = {};
   String _timeFilterType = 'all';
   DateTimeRange? _customDateRange;
   final Set<String> _selectedCities = {};
+
+  // Fungsi helper untuk mengirim data terbaru ke MyEventPage
+  void _notifyChange() {
+    widget.onFilterChanged(FilterData(
+      status: _selectedStatus,
+      sports: _selectedSports,
+      timeType: _timeFilterType,
+      customDateRange: _customDateRange,
+      cities: _selectedCities,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +128,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                       if (value != null) {
                         setState(() => _selectedStatus = value);
                         setModalState(() {});
+                        _notifyChange();
                         Navigator.pop(context);
                       }
                     },
@@ -173,6 +203,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                                 }
                               });
                               setModalState(() {});
+                              _notifyChange();
                             },
                           );
                         },
@@ -218,6 +249,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                           _customDateRange = null;
                         });
                         setModalState(() {});
+                        _notifyChange();
                         Navigator.pop(context);
                       } else if (value == 'custom') {
                         _openCustomDatePickerFlow(context, setModalState);
@@ -319,6 +351,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                                 }
                               });
                               setModalState(() {});
+                              _notifyChange();
                             },
                           );
                         },
@@ -374,6 +407,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
 
       // Update tampilan modal bottom sheet (agar radio button 'custom' terupdate teksnya)
       setModalState(() {});
+      _notifyChange();
 
       // Opsi: Langsung tutup bottom sheet setelah memilih tanggal agar user langsung lihat hasil filter
       Navigator.pop(context);
