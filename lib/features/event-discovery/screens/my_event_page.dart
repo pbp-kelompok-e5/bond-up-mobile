@@ -144,9 +144,6 @@ class _MyEventScreen extends State<MyEventScreen>{
         // 4. Filter Waktu
         bool timeMatch = true;
         if (_currentFilter.timeType == '30_days') {
-          // Misal: Event dalam 30 hari ke depan (atau ke belakang, tergantung konteks 'History')
-          // Asumsi: My Joined Events biasanya untuk melihat jadwal ke depan atau history ke belakang.
-          // Mari kita ambil: 30 hari ke belakang (history) s/d tak terbatas ke depan
           final thirtyDaysAgo = now.subtract(const Duration(days: 30));
           timeMatch = event.eventDate.isAfter(thirtyDaysAgo);
         } else if (_currentFilter.timeType == 'custom' && _currentFilter.customDateRange != null) {
@@ -174,7 +171,7 @@ class _MyEventScreen extends State<MyEventScreen>{
         backgroundColor: Theme.of(context).colorScheme.primary,
         // foregroundColor memaksa semua text dan icon di AppBar (termasuk drawer) menjadi Putih
         foregroundColor: Colors.white,
-        title: const Text("Event Detail"),
+        title: const Text("My Events"),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -216,8 +213,6 @@ class _MyEventScreen extends State<MyEventScreen>{
                           builder: (context) => EventDetailScreen(event: event),
                         ),
                       );
-                      // Refresh saat kembali (jika user leave event)
-                      _fetchMyEvents();
                     },
                   );
                 },
