@@ -9,6 +9,7 @@ import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/my_event_page.dart';
 
 /// App-wide navigation drawer
 class AppDrawer extends StatelessWidget {
@@ -63,7 +64,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const MyEventsPage(),
+                  builder: (context) => const MyEventScreen(),
                 ),
               );
             },
