@@ -7,6 +7,7 @@ import '../services/event_service.dart';
 import '../models/event.dart';
 import 'event_form_page.dart';
 import 'event_detail_page.dart';
+import 'participants_page.dart';
 
 class MyEventsPage extends StatefulWidget {
   const MyEventsPage({super.key});
@@ -95,6 +96,21 @@ class _MyEventsPageState extends State<MyEventsPage> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EventFormPage()),
+          );
+          if (created == true) {
+            _refresh();
+          }
+        },
+        label: const Text("Add Event"),
+        icon: const Icon(Icons.add),
+        backgroundColor: AppColors.orangeSport,
+        foregroundColor: AppColors.white,
+      ),
     );
   }
 
@@ -120,7 +136,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
               ),
             ),
           ),
-        ...events.map((e) => _buildEventCard(e, isPast)).toList(),
+        ...events.map((e) => _buildEventCard(e, isPast)),
       ],
     );
   }
@@ -204,9 +220,11 @@ class _MyEventsPageState extends State<MyEventsPage> {
     Color chipColor;
     String chipText = status.toUpperCase();
 
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'upcoming':
+      case 'open':
         chipColor = AppColors.statusActiveBackground;
+        chipText = 'UPCOMING';
         break;
       case 'cancelled':
         chipColor = AppColors.statusCancelledBackground;
@@ -235,7 +253,20 @@ class _MyEventsPageState extends State<MyEventsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (event.status == "upcoming")
+        if (event.status.toLowerCase() == "open") ...[
+          TextButton.icon(
+            icon: const Icon(Icons.people, size: 16),
+            label: const Text("Participants"),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.statusCompleted,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ParticipantsPage(eventId: event.id)),
+              );
+            },
+          ),
           TextButton.icon(
             icon: const Icon(Icons.edit, size: 16),
             label: const Text("Edit"),
@@ -244,7 +275,6 @@ class _MyEventsPageState extends State<MyEventsPage> {
             ),
             onPressed: () => _editEvent(event),
           ),
-        if (event.status == "upcoming")
           TextButton.icon(
             icon: const Icon(Icons.cancel, size: 16),
             label: const Text("Cancel"),
@@ -253,6 +283,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
             ),
             onPressed: () => _cancelEvent(event),
           ),
+        ],
         TextButton.icon(
           icon: const Icon(Icons.delete_forever, size: 16),
           label: const Text("Delete"),

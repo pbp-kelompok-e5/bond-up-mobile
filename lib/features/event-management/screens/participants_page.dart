@@ -1,7 +1,9 @@
 import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart' show CookieRequest;
+import '../models/participant.dart';
 import '../services/event_service.dart';
 
 class ParticipantsPage extends StatefulWidget {
@@ -15,7 +17,7 @@ class ParticipantsPage extends StatefulWidget {
 
 class _ParticipantsPageState extends State<ParticipantsPage> {
   late EventService service;
-  late Future<List<Map<String, dynamic>>> _participantsFuture;
+  late Future<List<Participant>> _participantsFuture;
 
   @override
   void didChangeDependencies() {
@@ -37,7 +39,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
       appBar: AppBar(
         title: const Text("Manage Participants"),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<List<Participant>>(
         future: _participantsFuture,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
@@ -78,10 +80,10 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     );
   }
 
-  Widget _buildParticipantTile(Map<String, dynamic> participant) {
+  Widget _buildParticipantTile(Participant participant) {
     final theme = Theme.of(context);
-    final username = participant["username"] ?? 'Unknown User';
-    final status = participant["status"] ?? 'pending';
+    final username = participant.username;
+    final status = participant.status;
 
     return ListTile(
       leading: CircleAvatar(
@@ -90,18 +92,35 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
         child: Text(username.isNotEmpty ? username[0].toUpperCase() : '?'),
       ),
       title: Text(username, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-      subtitle: _buildStatusChip(status),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          _buildStatusChip(status),
+          const SizedBox(height: 4),
+          Text(
+            'Joined: ${DateFormat.yMMMd().add_jm().format(participant.joinedAt)}',
+            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.gray400),
+          ),
+        ],
+      ),
       trailing: PopupMenuButton<String>(
-        onSelected: (value) => _handleAction(value, participant["user_id"]),
+        onSelected: (value) => _handleAction(value, participant),
         itemBuilder: (context) => [
           const PopupMenuItem(
             value: "remove",
-            child: Text("Remove Participant"),
+            child: ListTile(
+              leading: Icon(Icons.person_remove, color: AppColors.buttonDanger),
+              title: Text("Remove"),
+            ),
           ),
           if (status == 'approved')
             const PopupMenuItem(
               value: "mark_attended",
-              child: Text("Mark as Attended"),
+              child: ListTile(
+                leading: Icon(Icons.check_circle, color: AppColors.statusCompleted),
+                title: Text("Mark Attended"),
+              ),
             ),
         ],
       ),
@@ -144,13 +163,72 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     );
   }
 
-  void _handleAction(String action, int userId) async {
-    final res = await service.manageParticipant(widget.eventId, action, userId);
+  void _handleAction(String action, Participant participant) async {
+    String title;
+    String content;
+    String confirmText;
+    bool isDestructive;
+
+    if (action == 'remove') {
+      title = 'Remove Participant?';
+      content = 'Are you sure you want to remove ${participant.username}?';
+      confirmText = 'Remove';
+      isDestructive = true;
+    } else if (action == 'mark_attended') {
+      title = 'Mark as Attended?';
+      content = 'Are you sure you want to mark ${participant.username} as attended?';
+      confirmText = 'Mark Attended';
+      isDestructive = false;
+    } else {
+      return;
+    }
+
+    final confirm = await _showConfirmationDialog(
+      title: title,
+      content: content,
+      confirmText: confirmText,
+      isDestructive: isDestructive,
+    );
+
+    if (!confirm || !mounted) return;
+
+    final res = await service.manageParticipant(widget.eventId, action, participant.userId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res["message"] ?? "Action successful!")),
       );
       _reload();
     }
+  }
+
+  Future<bool> _showConfirmationDialog({
+    required String title,
+    required String content,
+    String confirmText = "Confirm",
+    bool isDestructive = false,
+  }) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.deepSeaLight,
+            title: Text(title, style: const TextStyle(color: AppColors.white)),
+            content: Text(content, style: const TextStyle(color: AppColors.gray300)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text("Cancel", style: TextStyle(color: AppColors.gray300)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: TextButton.styleFrom(
+                  backgroundColor: isDestructive ? AppColors.buttonDanger : AppColors.statusActive,
+                  foregroundColor: AppColors.white,
+                ),
+                child: Text(confirmText),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }
