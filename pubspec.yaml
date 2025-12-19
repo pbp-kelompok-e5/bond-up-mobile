@@ -48,12 +48,9 @@ dependencies:
   shared_preferences: ^2.5.3
   image_picker: ^1.2.1
 
-<<<<<<< HEAD
-=======
   # Date formatting
   intl: ^0.19.0
 
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
 dev_dependencies:
   flutter_test:
     sdk: flutter
