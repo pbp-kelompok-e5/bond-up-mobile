@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
@@ -48,7 +49,7 @@ class EventDiscoveryService {
   Future<bool> joinEvent(int eventId) async {
     try {
       final response = await request.post(
-          '$baseUrl/event_discovery/events/$eventId/join',
+          '$baseUrl/event-discovery/events/$eventId/join',
           {} // Empty body, ID is in the URL
       );
 
@@ -69,7 +70,7 @@ class EventDiscoveryService {
     try {
       // Using POST as this modifies server state, even though it deletes a record
       final response = await request.post(
-          '$baseUrl/event_discovery/events/$eventId/leave',
+          '$baseUrl/event-discovery/events/$eventId/leave',
           {}
       );
 
@@ -89,7 +90,7 @@ class EventDiscoveryService {
     try {
       // The endpoint defined in urls.py is events/<id>/participant-status/
       final response = await request.get(
-        '$baseUrl/event_discovery/events/$eventId/participant-status/',
+        '$baseUrl/event-discovery/events/$eventId/participant-status/',
       );
 
       // The Django view returns: {'status': '...'}
@@ -101,6 +102,23 @@ class EventDiscoveryService {
     } catch (e) {
       // Fallback in case of error (e.g., not logged in or network issue)
       return 'not_participating';
+    }
+  }
+
+  // Fetch Event JSON BY ID
+  Future<Event?> fetchEventById(String eventId) async {
+    try {
+      // Construct the URL matching your Django urls.py: path('events/<int:id>/json/', ...)
+      final response = await request.get('$baseUrl/event-discovery/events/$eventId/json/');
+
+      // Django usually returns a single object for this specific endpoint
+      if (response != null) {
+        return Event.fromJson(response);
+      }
+      return null;
+    } catch (e) {
+      //debugPrint("Error fetching event $eventId: $e");
+      return null;
     }
   }
 }

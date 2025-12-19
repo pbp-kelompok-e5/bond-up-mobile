@@ -23,14 +23,36 @@ class _EventDetailScreen extends State<EventDetailScreen>{
   bool _isActionLoading = false;
   String _status = 'not_participating';
   late int _currentParticipants;
+  late Event _event;
 
   @override
   void initState() {
     super.initState();
     final request = context.read<CookieRequest>();
     _service = EventDiscoveryService(request);
-    _currentParticipants = widget.event.currentParticipants;
+    _event = widget.event;
+    _currentParticipants = _event.currentParticipants;
     _fetchStatus();
+  }
+
+  // Fetch fresh data from backend (Refresh Logic)
+  Future<void> _refreshEventData() async {
+    // Fetch updated event details using ID
+    final updatedEvent = await _service.fetchEventById(_event.id);
+
+    // Fetch updated status
+    final updatedStatus = await _service.getParticipantStatus(int.parse(_event.id));
+
+    if (mounted) {
+      setState(() {
+        if (updatedEvent != null) {
+          _event = updatedEvent;
+          // Update local participants count to match server
+          _currentParticipants = updatedEvent.currentParticipants;
+        }
+        _status = updatedStatus;
+      });
+    }
   }
 
   // Logout
@@ -85,8 +107,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
       if (success) {
         ToastUtils.showSuccess(context, "Successfully joined the event!");
         setState(() {
-          _status = 'joined';
-          _currentParticipants++;
+          _refreshEventData();
         });
       } else {
         ToastUtils.showError(context, "Failed to join event.");
@@ -103,8 +124,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
       if (success) {
         ToastUtils.showSuccess(context, "You have left the event.");
         setState(() {
-          _status = 'not_participating';
-          _currentParticipants--;
+          _refreshEventData();
         });
       } else {
         ToastUtils.showError(context, "Failed to leave event.");
@@ -114,22 +134,18 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
   @override
   Widget build(BuildContext context) {
-    // Calculate if event is full
-    final bool isFull = _currentParticipants >= widget.event.maxParticipants;
+    // Calculate if event is full based on local state
+    final bool isFull = _currentParticipants >= _event.maxParticipants;
 
     return Scaffold(
       appBar: AppBar(
-        // UBAH WARNA DI SINI:
-        // Gunakan warna primary agar lebih tegas sebagai background
         backgroundColor: Theme.of(context).colorScheme.primary,
-        // foregroundColor memaksa semua text dan icon di AppBar (termasuk drawer) menjadi Putih
         foregroundColor: Colors.white,
         title: const Text("Event Detail"),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            // Aksi saat tombol logout ditekan
             onPressed: _handleLogout,
           ),
         ],
@@ -137,108 +153,114 @@ class _EventDetailScreen extends State<EventDetailScreen>{
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // Scrollable Content
+          // Scrollable Content wrapped in RefreshIndicator
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Event Thumbnail
-                  SizedBox(
-                    width: double.infinity,
-                    height: 200,
-                    child: widget.event.thumbnail != null && widget.event.thumbnail!.isNotEmpty
-                        ? Image.network(
-                      widget.event.thumbnail!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, error, stack) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+            child: RefreshIndicator(
+              // Triggered when user swipes down
+              onRefresh: _refreshEventData,
+              child: SingleChildScrollView(
+                // Ensure scroll view is always scrollable so refresh works even if content is short
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event Thumbnail (Using _event instead of widget.event)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: _event.thumbnail != null && _event.thumbnail!.isNotEmpty
+                          ? Image.network(
+                        _event.thumbnail!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, error, stack) => Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                        ),
+                      )
+                          : Container(
+                        color: Colors.blueAccent.withOpacity(0.2),
+                        child: const Icon(Icons.event, size: 60, color: Colors.blueAccent),
                       ),
-                    )
-                        : Container(
-                      color: Colors.blueAccent.withOpacity(0.2),
-                      child: const Icon(Icons.event, size: 60, color: Colors.blueAccent),
                     ),
-                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title
-                        Text(
-                          widget.event.title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            _event.title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
+                          const SizedBox(height: 8),
 
-                        // Organizer
-                        Row(
-                          children: [
-                            const Icon(Icons.person, size: 16, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Text(
-                              "Organized by ${widget.event.organizer}",
-                              style: TextStyle(color: Colors.grey[700]),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                          // Organizer
+                          Row(
+                            children: [
+                              const Icon(Icons.person, size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Organized by ${_event.organizer}",
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
 
-                        // Tags (City, Sport)
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            Chip(
-                              label: Text(widget.event.city),
-                              avatar: const Icon(Icons.location_city, size: 16),
-                              backgroundColor: Colors.blue[50],
-                            ),
-                            Chip(
-                              label: Text(widget.event.sportType),
-                              avatar: const Icon(Icons.sports, size: 16),
-                              backgroundColor: Colors.orange[50],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
+                          // Tags (City, Sport)
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              Chip(
+                                label: Text(_event.city),
+                                avatar: const Icon(Icons.location_city, size: 16),
+                                backgroundColor: Colors.blue[50],
+                              ),
+                              Chip(
+                                label: Text(_event.sportType),
+                                avatar: const Icon(Icons.sports, size: 16),
+                                backgroundColor: Colors.orange[50],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
 
-                        // Info Grid
-                        _buildInfoRow(Icons.calendar_today, "Date", widget.event.eventDate.toString().split(' ')[0]),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(Icons.access_time, "Time", "${widget.event.startTime} - ${widget.event.endTime}"),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(Icons.place, "Location", widget.event.locationName),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(
-                          Icons.group,
-                          "Participants",
-                          "$_currentParticipants / ${widget.event.maxParticipants}",
-                          highlight: isFull && _status != 'joined',
-                        ),
+                          // Info Grid
+                          _buildInfoRow(Icons.calendar_today, "Date", _event.eventDate.toString().split(' ')[0]),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(Icons.access_time, "Time", "${_event.startTime} - ${_event.endTime}"),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(Icons.place, "Location", _event.locationName),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                            Icons.group,
+                            "Participants",
+                            "$_currentParticipants / ${_event.maxParticipants}",
+                            highlight: isFull && _status != 'joined',
+                          ),
 
-                        const Divider(height: 40),
+                          const Divider(height: 40),
 
-                        // Description
-                        const Text(
-                          "About Event",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.event.description,
-                          style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
-                        ),
-                        const SizedBox(height: 80), // Space for bottom bar
-                      ],
+                          // Description
+                          const Text(
+                            "About Event",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _event.description,
+                            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 80), // Space for bottom bar
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
