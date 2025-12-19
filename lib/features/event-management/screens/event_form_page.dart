@@ -145,6 +145,7 @@ class _EventFormPageState extends State<EventFormPage> {
                   if (!_formKey.currentState!.validate()) return;
                   _formKey.currentState!.save();
 
+                  // Event create time validation
                   if (_eventDate != null &&
                       _startTime != null &&
                       DateUtils.dateOnly(_eventDate!).isAtSameMomentAs(DateUtils.dateOnly(DateTime.now()))) {

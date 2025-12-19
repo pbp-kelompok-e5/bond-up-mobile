@@ -40,19 +40,6 @@ class _MyEventsPageState extends State<MyEventsPage> {
         title: const Text('My Events'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, size: 28),
-            tooltip: "Create Event",
-            onPressed: () async {
-              final created = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EventFormPage()),
-              );
-              if (created == true) {
-                _refresh();
-              }
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: "Refresh",
             onPressed: _refresh,
