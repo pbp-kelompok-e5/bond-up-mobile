@@ -94,15 +94,27 @@ class PointsDashboardModel {
 
   /// Create PointsDashboardModel from JSON
   factory PointsDashboardModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>? ?? {};
-    final breakdownJson = data['breakdown'] as Map<String, dynamic>? ?? {};
-    final achievementsList = data['recent_achievements'] as List<dynamic>? ?? [];
+    final data = json['data'] is Map
+        ? Map<String, dynamic>.from(json['data'])
+        : <String, dynamic>{};
 
-    // Parse breakdown
-    final breakdown = <String, ActivityBreakdownModel>{};
-    breakdownJson.forEach((key, value) {
-      breakdown[key] = ActivityBreakdownModel.fromJson(value as Map<String, dynamic>);
-    });
+    final rawBreakdown = data['breakdown'];
+    final achievementsList =
+        data['recent_achievements'] as List<dynamic>? ?? [];
+
+    final Map<String, ActivityBreakdownModel> breakdown = {};
+
+    if (rawBreakdown is Map) {
+      final breakdownMap = Map<String, dynamic>.from(rawBreakdown);
+
+      breakdownMap.forEach((key, value) {
+        if (value is Map) {
+          breakdown[key] = ActivityBreakdownModel.fromJson(
+            Map<String, dynamic>.from(value),
+          );
+        }
+      });
+    }
 
     return PointsDashboardModel(
       totalPoints: data['total_points'] as int? ?? 0,
@@ -112,7 +124,12 @@ class PointsDashboardModel {
       badge: data['badge'] as String? ?? '🔰',
       breakdown: breakdown,
       recentAchievements: achievementsList
-          .map((achievement) => AchievementModel.fromJson(achievement as Map<String, dynamic>))
+          .whereType<Map>()
+          .map(
+            (achievement) => AchievementModel.fromJson(
+              Map<String, dynamic>.from(achievement),
+            ),
+          )
           .toList(),
     );
   }
@@ -135,10 +152,7 @@ class PointsDashboardResponseModel {
     return PointsDashboardResponseModel(
       status: json['status'] as bool? ?? false,
       message: json['message'] as String? ?? '',
-      data: json['data'] != null
-          ? PointsDashboardModel.fromJson(json)
-          : null,
+      data: json['data'] != null ? PointsDashboardModel.fromJson(json) : null,
     );
   }
 }
-
