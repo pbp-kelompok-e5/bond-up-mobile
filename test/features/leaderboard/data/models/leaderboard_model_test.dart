@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-// Ganti import ini sesuai lokasi file model kamu sebenarnya
 import 'package:bond_up_mobile/features/leaderboard/data/models/leaderboard_entry_model.dart'; 
 
 void main() {
