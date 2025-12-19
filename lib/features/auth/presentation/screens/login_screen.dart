@@ -91,6 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Center(
@@ -102,6 +103,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+=======
+      backgroundColor: AppColors.deepSea,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                   // Logo or App Name
                   Text(
                     'BondUp',
@@ -115,7 +131,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Find Your Sports Partner',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+<<<<<<< HEAD
                           color: AppColors.gray600,
+=======
+                          color: AppColors.white.withValues(alpha: 0.8),
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -126,7 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _usernameController,
                     label: 'Username',
                     hint: 'Enter your username',
+<<<<<<< HEAD
                     prefixIcon: const Icon(Icons.person_outline),
+=======
+                    prefixIcon: const Icon(Icons.person_outline, color: AppColors.white),
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your username';
@@ -142,7 +166,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Password',
                     hint: 'Enter your password',
                     obscureText: true,
+<<<<<<< HEAD
                     prefixIcon: const Icon(Icons.lock_outline),
+=======
+                    prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -169,7 +197,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         "Don't have an account? ",
+<<<<<<< HEAD
                         style: Theme.of(context).textTheme.bodyMedium,
+=======
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.white,
+                            ),
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                       ),
                       GestureDetector(
                         onTap: () {
@@ -190,7 +224,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+<<<<<<< HEAD
                 ],
+=======
+                  ],
+                ),
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
               ),
             ),
           ),
