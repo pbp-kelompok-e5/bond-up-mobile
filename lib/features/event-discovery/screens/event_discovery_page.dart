@@ -11,7 +11,8 @@ import '../widget/event_tile.dart';
 
 class EventDiscoveryScreen extends StatefulWidget{
   final String? initialSport;
-  const EventDiscoveryScreen({super.key, this.initialSport});
+  final String? initialSearchQuery;
+  const EventDiscoveryScreen({super.key, this.initialSport, this.initialSearchQuery});
 
   @override
   State<EventDiscoveryScreen> createState() => _EventDiscoveryScreenState();
@@ -34,6 +35,7 @@ class _EventDiscoveryScreenState extends State<EventDiscoveryScreen>{
   void initState() {
     super.initState();
     final request = context.read<CookieRequest>();
+    _searchQuery = widget.initialSearchQuery ?? "";
     _service = EventDiscoveryService(request);
     _currentFilter = FilterData(
       sports: widget.initialSport != null ? {widget.initialSport!} : {},
@@ -85,8 +87,6 @@ class _EventDiscoveryScreenState extends State<EventDiscoveryScreen>{
         // 1. Filter Pencarian (Search Bar)
         bool searchMatch = true;
         if (_searchQuery.isNotEmpty) {
-          // PERBAIKAN: Menggunakan event.title sesuai model
-          // Menggunakan toLowerCase() agar pencarian tidak sensitif huruf besar/kecil
           searchMatch = event.title.toLowerCase().contains(_searchQuery.toLowerCase());
         }
 
@@ -125,7 +125,7 @@ class _EventDiscoveryScreenState extends State<EventDiscoveryScreen>{
     // Navigator.push mengembalikan hasil dari Navigator.pop di halaman sebelah
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const EventSearchPage()),
+      MaterialPageRoute(builder: (context) => const EventSearchPage(fromDiscovery: true)),
     );
 
     // Jika user menekan enter atau memilih history, result tidak null

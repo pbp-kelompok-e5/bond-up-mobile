@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/event_discovery_page.dart';
 
 class EventSearchPage extends StatefulWidget {
-  const EventSearchPage({super.key});
+  final bool fromDiscovery;
+  const EventSearchPage({super.key, this.fromDiscovery = false});
 
   @override
   State<EventSearchPage> createState() => _EventSearchPageState();
@@ -28,14 +30,18 @@ class _EventSearchPageState extends State<EventSearchPage> {
       }
     });
 
-    // Kembali ke halaman sebelumnya membawa hasil query
-    Navigator.pop(context, query);
-  }
-
-  void _removeHistoryItem(String item) {
-    setState(() {
-      searchHistory.remove(item);
-    });
+    if (widget.fromDiscovery) {
+      // Jika dari Discovery, cukup kembalikan nilainya
+      Navigator.pop(context, query);
+    } else {
+      // Jika dari screen lain (misal Home), pindah ke Discovery dengan query
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EventDiscoveryScreen(initialSearchQuery: query),
+        ),
+      );
+    }
   }
 
   @override
@@ -93,7 +99,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
                     ),
                     backgroundColor: Colors.white,
                     side: BorderSide(
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
