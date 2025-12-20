@@ -10,20 +10,26 @@ class LeaderboardService {
 
   LeaderboardService(this.request);
 
+  /// Helper untuk menormalkan response Map dari backend / mock
+  Map<String, dynamic> _safeMap(dynamic response) {
+    if (response is Map) {
+      return Map<String, dynamic>.from(response);
+    }
+    return <String, dynamic>{};
+  }
+
   /// Get leaderboard data
-  ///
-  /// Returns a ranked list of users based on total points
-  ///
-  /// Parameters:
-  /// - [page]: Page number (default: 1)
-  /// - [limit]: Number of users per page (default: 10)
-  Future<LeaderboardResponseModel> getLeaderboard({int page = 1, int limit = 10}) async {
+  Future<LeaderboardResponseModel> getLeaderboard({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
       final response = await request.get(
         '${AuthService.baseUrl}/leaderboard/api/flutter/leaderboard/?page=$page&limit=$limit',
       );
 
-      return LeaderboardResponseModel.fromJson(response);
+      final json = _safeMap(response);
+      return LeaderboardResponseModel.fromJson(json);
     } catch (e) {
       return LeaderboardResponseModel(
         status: false,
@@ -35,15 +41,14 @@ class LeaderboardService {
   }
 
   /// Get authenticated user's points dashboard
-  /// 
-  /// Returns the user's points summary, breakdown, and recent achievements
   Future<PointsDashboardResponseModel> getPointsDashboard() async {
     try {
       final response = await request.get(
         '${AuthService.baseUrl}/leaderboard/api/flutter/points/dashboard/',
       );
 
-      return PointsDashboardResponseModel.fromJson(response);
+      final json = _safeMap(response);
+      return PointsDashboardResponseModel.fromJson(json);
     } catch (e) {
       return PointsDashboardResponseModel(
         status: false,
@@ -53,26 +58,22 @@ class LeaderboardService {
   }
 
   /// Get authenticated user's points transaction history
-  /// 
-  /// Returns a list of all points transactions for the user
-  /// 
-  /// Parameters:
-  /// - [limit]: Maximum number of transactions to return (default: 100)
-  /// - [activityType]: Filter by activity type (optional)
   Future<PointsHistoryResponseModel> getPointsHistory({
     int limit = 100,
     String? activityType,
   }) async {
     try {
-      String url = '${AuthService.baseUrl}/leaderboard/api/flutter/points/history/?limit=$limit';
-      
+      String url =
+          '${AuthService.baseUrl}/leaderboard/api/flutter/points/history/?limit=$limit';
+
       if (activityType != null && activityType.isNotEmpty) {
         url += '&activity_type=$activityType';
       }
 
       final response = await request.get(url);
 
-      return PointsHistoryResponseModel.fromJson(response);
+      final json = _safeMap(response);
+      return PointsHistoryResponseModel.fromJson(json);
     } catch (e) {
       return PointsHistoryResponseModel(
         status: false,
@@ -83,4 +84,3 @@ class LeaderboardService {
     }
   }
 }
-

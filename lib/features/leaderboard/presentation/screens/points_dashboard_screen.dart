@@ -311,7 +311,7 @@ class _PointsDashboardScreenState extends State<PointsDashboardScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.orangeSport.withOpacity(0.2),
+                      color: AppColors.orangeSport.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Center(
