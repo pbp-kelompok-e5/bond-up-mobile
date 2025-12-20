@@ -118,26 +118,29 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
           ),
         ],
       ),
-      // Menu popup untuk aksi peserta (hapus, tandai hadir).
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) => _handleAction(value, participant),
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: "remove",
-            child: ListTile(
-              leading: Icon(Icons.person_remove, color: AppColors.buttonDanger),
-              title: Text("Remove"),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (status == 'joined')
+            IconButton(
+              icon: const Icon(Icons.check_circle),
+              color: AppColors.statusCompleted,
+              tooltip: "Mark Attended",
+              onPressed: () => _handleAction('mark_attended', participant),
             ),
+          if (status == 'attended')
+            IconButton(
+              icon: const Icon(Icons.undo),
+              color: AppColors.toastWarningEnd,
+              tooltip: "Unmark Attended",
+              onPressed: () => _handleAction('unmark_attended', participant),
+            ),
+          IconButton(
+            icon: const Icon(Icons.person_remove),
+            color: AppColors.buttonDanger,
+            tooltip: "Remove Participant",
+            onPressed: () => _handleAction('remove', participant),
           ),
-          // Opsi "Mark Attended" hanya tersedia untuk peserta yang statusnya 'approved'.
-          if (status == 'approved')
-            const PopupMenuItem(
-              value: "mark_attended",
-              child: ListTile(
-                leading: Icon(Icons.check_circle, color: AppColors.statusCompleted),
-                title: Text("Mark Attended"),
-              ),
-            ),
         ],
       ),
     );
@@ -193,6 +196,11 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
       title = 'Mark as Attended?';
       content = 'Are you sure you want to mark ${participant.username} as attended?';
       confirmText = 'Mark Attended';
+      isDestructive = false;
+    } else if (action == 'unmark_attended') {
+      title = 'Unmark Attended?';
+      content = 'Are you sure you want to unmark ${participant.username} as attended?';
+      confirmText = 'Unmark';
       isDestructive = false;
     } else {
       return;
