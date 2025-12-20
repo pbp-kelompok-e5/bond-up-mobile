@@ -10,7 +10,7 @@ class AuthService {
   // For Android emulator: http://10.0.2.2:8000
   // For web/Chrome: http://localhost:8000
   // For production: https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id
-  static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id/';
+  static const String baseUrl = 'http://localhost:8000';
   
   final CookieRequest request;
 
