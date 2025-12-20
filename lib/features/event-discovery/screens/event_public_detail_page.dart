@@ -20,6 +20,7 @@ class _EventPublicDetailPageState extends State<EventPublicDetailPage> {
   late EventDiscoveryService _service;
   bool _isJoined = false;
   bool _isLoading = false;
+  String? _currentUsername; // Added to store current user's username
 
   @override
   void initState() {
@@ -33,6 +34,16 @@ class _EventPublicDetailPageState extends State<EventPublicDetailPage> {
     super.didChangeDependencies();
     final request = context.watch<CookieRequest>();
     _service = EventDiscoveryService(request);
+    _fetchUsername(); // Call the async method to fetch username
+  }
+
+  Future<void> _fetchUsername() async {
+    final username = await _service.fetchCurrentUsername();
+    if (mounted) {
+      setState(() {
+        _currentUsername = username;
+      });
+    }
   }
 
   Future<void> _refreshEvent() async {
@@ -83,8 +94,13 @@ class _EventPublicDetailPageState extends State<EventPublicDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool canJoin =
-        event.status.toLowerCase() == 'upcoming' || event.status.toLowerCase() == 'open';
+    // Check if the current user is the event organizer
+    final bool isOrganizer = _currentUsername == event.organizerUsername;
+
+    // Determine if the event can be joined by a non-organizer
+    final bool canInteract =
+        (event.status.toLowerCase() == 'upcoming' || event.status.toLowerCase() == 'open') &&
+        event.currentParticipants < event.maxParticipants;
 
     return Scaffold(
       body: CustomScrollView(
@@ -191,7 +207,7 @@ class _EventPublicDetailPageState extends State<EventPublicDetailPage> {
           ),
         ],
       ),
-      bottomNavigationBar: canJoin
+      bottomNavigationBar: !isOrganizer && canInteract
           ? Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton.icon(
