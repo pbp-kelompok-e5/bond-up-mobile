@@ -1,6 +1,9 @@
-import 'package:bond_up_mobile/features/partner_matching/data/model/user_match_model.dart';
+import 'dart:math'; 
+import 'package:bond_up_mobile/core/design_system.dart';
+import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:flutter/material.dart';
 import '../screens/user_profile_screen.dart';
+import 'package:bond_up_mobile/core/constants/app_constants.dart';
 
 class UserCard extends StatelessWidget {
   final UserMatchModel user;
@@ -9,111 +12,171 @@ class UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          // Navigasi ke UserProfileScreen dengan membawa ID user
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => UserProfileScreen(userId: user.id),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(user.profilePictureUrl ?? "https://ui-avatars.com/api/?name=${user.username}"),
-                backgroundColor: Colors.grey[200],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserProfileScreen(userId: user.id),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center, // Rata atas biar rapi
+          children: [
+            // --- Avatar Section ---
+            Container(
+              padding: const EdgeInsets.all(2), // Ketebalan border
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.orangeSport, // Warna Border Orange
+                  width: 2,
+                ),
               ),
-              const SizedBox(width: 16),
-              
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.fullName.isNotEmpty ? user.fullName : user.username,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              child: CircleAvatar(
+                radius: 26, 
+                backgroundColor: AppColors.deepSeaLighter,
+                backgroundImage: NetworkImage(
+                  user.profilePictureUrl.isNotEmpty
+                      ? user.profilePictureUrl
+                      : "https://ui-avatars.com/api/?name=${user.username}&background=random",
+                ),
+              ),
+            ),
+            
+            const SizedBox(width: 24),
+
+            // --- INFO SECTION ---
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Nama User
+                  Text(
+                    user.fullName.isNotEmpty ? user.fullName : user.username,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  
+                  // Username
+                  Text(
+                    "@${user.username}",
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6), 
+                      fontSize: 13
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+
+                  // Baris Kota
+                  if (user.city.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 14, color: AppColors.statusCompleted), // Icon Biru
+                          const SizedBox(width: 4),
+                          Text(
+                            AppConstants.getCityDisplay(user.city),
+                            style: const TextStyle(
+                              color: AppColors.statusCompleted, 
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "@${user.username}",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    // Sports Chips (limit 2 biar gak overflow)
+
+                  // Baris Sport Chips
+                  if (user.sports.isNotEmpty && user.sports != "No Sports")
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
-                      children: [
-                        if (user.city != null && user.city!.isNotEmpty)
-                          _buildMiniChip(Icons.location_on, user.city!, Colors.blue),
-                        
-                        // Asumsi user.sports adalah String comma-separated "football, tennis"
-                        // Sesuaikan dengan format data kamu
-                        if (user.sports.isNotEmpty && user.sports != "No Sports")
-                          ..._buildSportChips(user.sports),
-                      ],
-                    )
-                  ],
-                ),
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: _buildSportChips(user.sports),
+                    ),
+                ],
               ),
-              
-              // Arrow Icon
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
-          ),
+            ),
+
+            // Arrow Icon
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Icon(
+                Icons.arrow_forward_ios, 
+                size: 14, 
+                color: Colors.white.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMiniChip(IconData icon, String label, Color color) {
+  // --- Helper: Chip Style ---
+  Widget _buildCustomChip({required String label, Color? bgColor, Color? textColor}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: (bgColor ?? AppColors.orangeSport).withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: (bgColor ?? AppColors.orangeSport).withValues(alpha: 0.4), 
+          width: 0.5
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
-          ),
-        ],
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10, 
+          color: textColor ?? AppColors.orangeSport, 
+          fontWeight: FontWeight.w600
+        ),
       ),
     );
   }
 
+  // --- Helper: Logic Overflow (+2) ---
   List<Widget> _buildSportChips(String sportsString) {
-    List<String> sports = sportsString.split(',');
+    List<String> sports = sportsString.split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
 
-    var displaySports = sports.take(3); 
+    int maxVisible = 2; // Maksimal chip yang ditampilin langsung
+    
+    List<Widget> chips = [];
 
-    return displaySports.map((sport) {
-      return _buildMiniChip(
-        Icons.sports_soccer, 
-        sport.trim(), 
-        Colors.orange,
+    // Loop sport yang mau ditampilin
+    for (var i = 0; i < min(sports.length, maxVisible); i++) {
+      chips.add(_buildCustomChip(label: sports[i]));
+    }
+
+    // Kalau ada sisa, tambahin chip "+X"
+    if (sports.length > maxVisible) {
+      int sisa = sports.length - maxVisible;
+      chips.add(
+        _buildCustomChip(
+          label: "+$sisa", 
+          bgColor: Colors.white, // Chip sisa warnanya beda (putih transparan)
+          textColor: Colors.white70
+        )
       );
-    }).toList();
+    }
+
+    return chips;
   }
 }

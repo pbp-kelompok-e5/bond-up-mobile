@@ -1,8 +1,9 @@
+import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:bond_up_mobile/core/design_system.dart'; 
 import '../../logic/connections_provider.dart';
-import '../widgets/user_card.dart';
-import '../../data/model/user_match_model.dart';
+import '../widgets/user_card.dart'; 
 
 class MyConnectionsScreen extends StatefulWidget {
   const MyConnectionsScreen({super.key});
@@ -15,29 +16,33 @@ class _MyConnectionsScreenState extends State<MyConnectionsScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch data ketika layar dibuka
-    Future.microtask(() => context.read<ConnectionsProvider>().loadConnections());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConnectionsProvider>().loadConnections();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4, // Jumlah Tab
+      length: 4,
       child: Scaffold(
+        backgroundColor: AppColors.gray800,
         appBar: AppBar(
           title: const Text("My Connections"),
-          backgroundColor: Colors.indigo,
+          backgroundColor: AppColors.deepSea,
           foregroundColor: Colors.white,
           bottom: const TabBar(
-            isScrollable: true, // Agar tab bisa discroll kalau kebanyakan
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Colors.orange,
+            isScrollable: true,
+            tabAlignment: TabAlignment.center,
+            labelColor: AppColors.orangeSport,
+            unselectedLabelColor: Colors.white60,
+            indicatorColor: AppColors.orangeSport,
+            dividerColor: Colors.transparent,
             tabs: [
               Tab(text: "Friends"),
               Tab(text: "Received"),
               Tab(text: "Sent"),
-              Tab(text: "Suggestions"),
+              Tab(text: "Recommendations"),
             ],
           ),
           actions: [
@@ -50,25 +55,25 @@ class _MyConnectionsScreenState extends State<MyConnectionsScreen> {
         body: Consumer<ConnectionsProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.orangeSport),
+              );
             }
 
             if (provider.errorMessage.isNotEmpty) {
-              return Center(child: Text("Error: ${provider.errorMessage}"));
+              return Center(
+                child: Text(
+                  "Error: ${provider.errorMessage}", 
+                  style: const TextStyle(color: Colors.white),
+                )
+              );
             }
 
             return TabBarView(
               children: [
-                // 1. Tab Friends (Tombol Remove)
                 _buildList(provider.myFriends, "No friends yet", "remove", "Remove"),
-                
-                // 2. Tab Received (Tombol Accept & Reject)
                 _buildReceivedList(provider.receivedRequests),
-                
-                // 3. Tab Sent (Tombol Cancel)
                 _buildList(provider.sentRequests, "No sent requests", "cancel", "Cancel"),
-                
-                // 4. Tab Suggestions (Tombol Connect)
                 _buildList(provider.recommendations, "No suggestions", "connect", "Connect"),
               ],
             );
@@ -78,36 +83,45 @@ class _MyConnectionsScreenState extends State<MyConnectionsScreen> {
     );
   }
 
-  // Widget untuk List Standar (1 Tombol)
   Widget _buildList(List<UserMatchModel> users, String emptyMsg, String action, String btnLabel) {
-    if (users.isEmpty) return Center(child: Text(emptyMsg));
+    if (users.isEmpty) {
+      return Center(
+        child: Text(
+          emptyMsg, 
+          style: const TextStyle(color: Colors.white54, fontSize: 16),
+        ),
+      );
+    }
 
-    return ListView.builder(
+    return ListView.separated(
       itemCount: users.length,
       padding: const EdgeInsets.all(16),
+      // Jarak 16 pixel antar item
+      separatorBuilder: (context, index) => const SizedBox(height: 16), 
       itemBuilder: (context, index) {
         final user = users[index];
-        // UserCard menggunakan Column agar bisa ditambahkan tombol di bawahnya
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Column(
+        
+        ButtonVariant variant = ButtonVariant.primary;
+        if (action == 'remove' || action == 'cancel') {
+          variant = ButtonVariant.danger;
+        } else if (action == 'connect') {
+          variant = ButtonVariant.primary;
+        }
+
+        return DeepSeaCard(
+          body: Column(
             children: [
-              UserCard(user: user), // UserCard di atas
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: action == 'remove' || action == 'cancel' ? Colors.red[50] : Colors.blue[50],
-                      foregroundColor: action == 'remove' || action == 'cancel' ? Colors.red : Colors.blue,
-                    ),
-                    onPressed: () {
-                      context.read<ConnectionsProvider>().handleAction(action, user.id);
-                    },
-                    child: Text(btnLabel),
-                  ),
-                ),
+              UserCard(user: user), 
+              const SizedBox(height: 12),
+              AppButton(
+                text: btnLabel,
+                variant: variant,
+                isFullWidth: true,
+                // Tombol Small
+                size: ButtonSize.small, 
+                onPressed: () {
+                  context.read<ConnectionsProvider>().handleAction(action, user.id);
+                },
               )
             ],
           ),
@@ -116,45 +130,53 @@ class _MyConnectionsScreenState extends State<MyConnectionsScreen> {
     );
   }
 
-  // Widget Khusus Tab Received (2 Tombol: Accept & Reject)
   Widget _buildReceivedList(List<UserMatchModel> users) {
-    if (users.isEmpty) return const Center(child: Text("No friend requests"));
+    if (users.isEmpty) {
+      return const Center(
+        child: Text(
+          "No friend requests",
+          style: TextStyle(color: Colors.white54, fontSize: 16),
+        ),
+      );
+    }
 
-    return ListView.builder(
+    // Pake ListView.separated
+    return ListView.separated(
       itemCount: users.length,
       padding: const EdgeInsets.all(16),
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final user = users[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Column(
+        
+        return DeepSeaCard(
+          body: Column(
             children: [
               UserCard(user: user),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                        onPressed: () {
-                          context.read<ConnectionsProvider>().handleAction('accept', user.id);
-                        },
-                        child: const Text("Accept"),
-                      ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      text: "Accept",
+                      variant: ButtonVariant.success,
+                      size: ButtonSize.small, // Ukuran kecil
+                      onPressed: () {
+                        context.read<ConnectionsProvider>().handleAction('accept', user.id);
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-                        onPressed: () {
-                          context.read<ConnectionsProvider>().handleAction('reject', user.id);
-                        },
-                        child: const Text("Reject"),
-                      ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppButton(
+                      text: "Reject",
+                      variant: ButtonVariant.danger,
+                      size: ButtonSize.small, // Ukuran Kecil
+                      onPressed: () {
+                        context.read<ConnectionsProvider>().handleAction('reject', user.id);
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               )
             ],
           ),

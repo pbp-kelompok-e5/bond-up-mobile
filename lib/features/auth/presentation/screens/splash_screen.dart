@@ -92,10 +92,14 @@ class _SplashScreenState extends State<SplashScreen> {
               'Find Your Sports Partner',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
 <<<<<<< HEAD
+                    color: AppColors.white.withValues(alpha: 0.8),
+=======
+<<<<<<< HEAD
                     color: AppColors.white.withOpacity(0.8),
 =======
                     color: AppColors.white.withValues(alpha: 0.8),
 >>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
+>>>>>>> 77207f9affbfcd922331b977912b5085dbe88a19
                   ),
             ),
             const SizedBox(height: 48),

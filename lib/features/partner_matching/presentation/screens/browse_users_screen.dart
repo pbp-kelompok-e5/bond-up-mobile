@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:bond_up_mobile/core/design_system.dart';
 import '../../logic/browse_users_provider.dart';
 import '../widgets/user_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -19,11 +20,13 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
   @override
   void initState() {
     super.initState();
-    // Panggil fetch data pertama kali saat layar dibuka
-    // Menggunakan Future.microtask agar tidak error saat build belum selesai
-    Future.microtask(() {
-      context.read<BrowseUsersProvider>().searchUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
     });
+  }
+
+  void _loadInitialData() {
+    context.read<BrowseUsersProvider>().searchUsers();
   }
 
   @override
@@ -33,24 +36,28 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
     super.dispose();
   }
 
-  // Fungsi Debounce biar tidak spam API saat mengetik di search bar
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      // Panggil fungsi search di Provider
       context.read<BrowseUsersProvider>().searchUsers(query: query);
     });
   }
 
+  Future<void> _onRefresh() async {
+    await context.read<BrowseUsersProvider>().searchUsers(
+          query: _searchController.text,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Watch: Akan rebuild halaman ini setiap kali ada perubahan di Provider (loading/data baru)
     final provider = context.watch<BrowseUsersProvider>();
 
     return Scaffold(
+      backgroundColor: AppColors.gray800,
       appBar: AppBar(
         title: const Text("Find Partners"),
-        backgroundColor: Colors.indigo,
+        backgroundColor: AppColors.deepSea,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -58,7 +65,7 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                isScrollControlled: true, // Agar bisa full height
+                isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
@@ -70,90 +77,125 @@ class _BrowseUsersScreenState extends State<BrowseUsersScreen> {
       ),
       body: Column(
         children: [
-          // 1. Search Bar
+          // Search Bar 
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.indigo,
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: "Search by name...",
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<BrowseUsersProvider>().searchUsers(query: '');
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+            color: AppColors.deepSea,
+            child: Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    controller: _searchController,
+                    hint: "Search by name...",
+                    onChanged: _onSearchChanged,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              ),
-            ),
+                
+                // Search Icon Button
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.orangeSport,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      context.read<BrowseUsersProvider>().searchUsers(
+                        query: _searchController.text,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
           ),
 
-          // 2. Content Area (Loading / Error / List)
+          // Content Area
           Expanded(
             child: Builder(
               builder: (context) {
-                // Skenario 1: Loading
                 if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.orangeSport,
+                    ),
+                  );
                 }
 
-                // Skenario 2: Error
                 if (provider.errorMessage.isNotEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                        const SizedBox(height: 16),
-                        Text("Error: ${provider.errorMessage}"),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<BrowseUsersProvider>().searchUsers();
-                          },
-                          child: const Text("Retry"),
-                        )
-                      ],
-                    ),
-                  );
-                }
-
-                // Skenario 3: Data Kosong
-                if (provider.users.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off, size: 80, color: Colors.grey[400]),
+                        Icon(
+                          Icons.error_outline,
+                          color: AppColors.buttonDanger,
+                          size: 60,
+                        ),
                         const SizedBox(height: 16),
                         Text(
-                          "No users found",
-                          style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                          "Error: ${provider.errorMessage}",
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        AppButton(
+                          text: "Retry",
+                          size: ButtonSize.small,
+                          onPressed: _loadInitialData,
                         ),
                       ],
                     ),
                   );
                 }
 
-                // Skenario 4: Ada Data (Tampilkan List)
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: provider.users.length,
-                  itemBuilder: (context, index) {
-                    final user = provider.users[index];
-                    return UserCard(user: user);
-                  },
+                if (provider.users.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No users found",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Try adjusting your search or filters",
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  color: AppColors.orangeSport,
+                  onRefresh: _onRefresh,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: provider.users.length,
+                    itemBuilder: (context, index) {
+                      final user = provider.users[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: DeepSeaCard(
+                          body: UserCard(user: user),
+                          onTap: () {
+                            // Navigate to user detail
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

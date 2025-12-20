@@ -1,5 +1,3 @@
-// lib/features/partner_matching/data/models/user_match_model.dart
-
 import 'dart:convert';
 
 // Fungsi helper buat parsing list UserMatchModel dari JSON
