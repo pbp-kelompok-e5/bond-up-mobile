@@ -6,10 +6,12 @@ import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:bond_up_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
+<<<<<<< HEAD
+=======
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
-import 'package:bond_up_mobile/features/event-discovery/screens/my_event_page.dart';
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
 
 /// App-wide navigation drawer
 class AppDrawer extends StatelessWidget {
@@ -61,12 +63,16 @@ class AppDrawer extends StatelessWidget {
             title: 'Events',
             onTap: () {
               Navigator.pop(context);
+<<<<<<< HEAD
+              ToastUtils.showInfo(context, 'Events feature coming soon!');
+=======
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const MyEventScreen(),
+                  builder: (context) => const MyEventsPage(),
                 ),
               );
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
             },
           ),
           _buildDrawerItem(
@@ -83,6 +89,10 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.leaderboard,
             title: 'Leaderboard',
             onTap: () {
+<<<<<<< HEAD
+              Navigator.pop(context);
+              ToastUtils.showInfo(context, 'Leaderboard feature coming soon!');
+=======
               Navigator.pop(context); // Close drawer
               Navigator.push(
                 context,
@@ -104,6 +114,7 @@ class AppDrawer extends StatelessWidget {
                   builder: (context) => const PointsDashboardScreen(),
                 ),
               );
+>>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
             },
           ),
           const Divider(color: AppColors.deepSeaLight),
