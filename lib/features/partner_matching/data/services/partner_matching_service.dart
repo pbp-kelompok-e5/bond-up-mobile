@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../models/connection_model.dart';
 import '../models/profile_detail_model.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 class PartnerMatchingService {
   final CookieRequest request;
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConstants.baseUrl;
 
   PartnerMatchingService(this.request);
 
