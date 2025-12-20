@@ -2,14 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-
-// Import model dan service kamu
 import 'package:bond_up_mobile/features/leaderboard/data/services/leaderboard_service.dart';
-import 'package:bond_up_mobile/features/leaderboard/data/models/leaderboard_entry_model.dart'; // Untuk referensi tipe jika perlu
-import 'package:bond_up_mobile/features/leaderboard/data/models/points_dashboard_model.dart';
-import 'package:bond_up_mobile/features/leaderboard/data/models/points_history_model.dart';
 
-// Annotation ini akan memerintahkan build_runner membuat file mock
 @GenerateMocks([CookieRequest])
 import 'leaderboard_service_test.mocks.dart';
 

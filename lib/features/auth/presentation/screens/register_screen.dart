@@ -153,6 +153,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Password field
+                  AppTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    hint: 'Create a password',
+                    obscureText: true,
                     prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -227,4 +233,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
-

@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
 
 

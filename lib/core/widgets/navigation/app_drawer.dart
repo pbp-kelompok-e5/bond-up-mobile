@@ -9,8 +9,8 @@ import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
->>>>>>>>> Temporary merge branch 2
+import 'package:bond_up_mobile/features/partner_matching/presentation/screens/browse_users_screen.dart';
+
 
 /// App-wide navigation drawer
 class AppDrawer extends StatelessWidget {
