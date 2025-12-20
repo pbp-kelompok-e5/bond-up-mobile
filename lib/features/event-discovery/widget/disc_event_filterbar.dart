@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
+import 'package:bond_up_mobile/features/profile/data/services/profile_service.dart';
 
 // Class untuk menampung state filter
 class FilterData {
-  final String status;
   final Set<String> sports;
   final String timeType;
   final DateTimeRange? customDateRange;
   final Set<String> cities;
 
   FilterData({
-    required this.status,
     required this.sports,
     required this.timeType,
     this.customDateRange,
@@ -21,24 +22,86 @@ class FilterData {
 
 class FilterBarSection extends StatefulWidget {
   final Function(FilterData) onFilterChanged; // Callback ke parent
+  final String? initialSportType;
 
-  const FilterBarSection({super.key, required this.onFilterChanged});
+  const FilterBarSection({
+  super.key,
+  required this.onFilterChanged,
+  this.initialSportType,});
+
   @override
   State<FilterBarSection> createState() => _FilterBarSectionState();
 }
 
 class _FilterBarSectionState extends State<FilterBarSection> {
   // --- STATE VARIABLES ---
-  String _selectedStatus = 'all';
   final Set<String> _selectedSports = {};
   String _timeFilterType = 'all';
   DateTimeRange? _customDateRange;
   final Set<String> _selectedCities = {};
+  bool _isProfileLoaded = false;
 
-  // Fungsi helper untuk mengirim data terbaru ke MyEventPage
+  @override
+  void initState() {
+    super.initState();
+
+    // 3. Logika inisialisasi Sport Default
+    if (widget.initialSportType != null &&
+        widget.initialSportType!.isNotEmpty) {
+
+      // Validasi apakah sport key ada di AppConstants agar aman
+      if (AppConstants.sportChoices.containsKey(widget.initialSportType)) {
+        _selectedSports.add(widget.initialSportType!);
+      }
+    }
+
+    // Panggil fungsi setelah frame pertama
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 4. Jika ada sport default, trigger perubahan filter SEGERA
+      // agar user melihat list terfilter sport meskipun data kota belum selesai diambil
+      if (_selectedSports.isNotEmpty) {
+        _notifyChange();
+      }
+
+      // Kemudian lanjut ambil data kota (async)
+      _fetchUserDefaultCity();
+    });
+  }
+
+  // --- LOGIC FETCH USER CITY ---
+  Future<void> _fetchUserDefaultCity() async {
+    if (_isProfileLoaded) return;
+
+    final request = context.read<CookieRequest>();
+    final profileService = ProfileService(request);
+
+    try {
+      final response = await profileService.getOwnProfile();
+
+      if (response.status && response.data != null) {
+        // Ambil city key dari profil (misal: 'JAKARTA_SELATAN' atau id-nya)
+        // Pastikan menggunakan properti 'city' (key), bukan 'cityDisplay' (nama tampilan)
+        // agar cocok dengan logika filter AppConstants.
+        final userCityKey = response.data!.city;
+
+        if (userCityKey.isNotEmpty) {
+          setState(() {
+            _selectedCities.add(userCityKey);
+            _isProfileLoaded = true;
+          });
+
+          // Beritahu parent (MyEventPage) bahwa filter berubah (default kota terisi)
+          _notifyChange();
+        }
+      }
+    } catch (e) {
+      debugPrint("Gagal mengambil default city: $e");
+    }
+  }
+
+  // Fungsi helper untuk mengirim data terbaru ke Evetn Page
   void _notifyChange() {
     widget.onFilterChanged(FilterData(
-      status: _selectedStatus,
       sports: _selectedSports,
       timeType: _timeFilterType,
       customDateRange: _customDateRange,
@@ -53,16 +116,6 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          _FilterChipButton(
-            label: _selectedStatus == 'upcoming'
-                ? 'Event Akan Datang'
-                : _selectedStatus == 'finished'
-                ? 'Event Selesai'
-                : 'Semua Status',
-            isActive: _selectedStatus == 'all' ? false : true,
-            onTap: () => _showStatusFilter(context),
-          ),
-          const SizedBox(width: 8),
           _FilterChipButton(
             label: _selectedSports.isEmpty
                 ? 'Semua Olahraga'
@@ -92,7 +145,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
   // Helper untuk label tombol waktu
   String _getTimeFilterLabel() {
     if (_timeFilterType == 'all') return 'Semua Tanggal';
-    if (_timeFilterType == '30_days') return '30 Hari Terakhir';
+    if (_timeFilterType == '7_days') return '7 Hari Kedepan';
     if (_customDateRange != null) {
       final start = DateFormat('dd MMM yyyy').format(_customDateRange!.start);
       final end = DateFormat('dd MMM yyyy').format(_customDateRange!.end);
@@ -102,64 +155,6 @@ class _FilterBarSectionState extends State<FilterBarSection> {
   }
 
   // --- MODAL BOTTOM SHEETS ---
-
-  // 1. MODAL STATUS (RadioGroup)
-  void _showStatusFilter(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text('Pilih Status Event',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-
-                  RadioGroup<String>(
-                    groupValue: _selectedStatus,
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedStatus = value);
-                        setModalState(() {});
-                        _notifyChange();
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Column(
-                      children: const [
-                        RadioListTile<String>(
-                          title: Text('Semua Status'),
-                          value: 'all',
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        RadioListTile<String>(
-                          title: Text('Event Akan Datang (Upcoming)'),
-                          value: 'upcoming',
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        RadioListTile<String>(
-                          title: Text('Event Selesai (Finished)'),
-                          value: 'finished',
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   // 2. MODAL SPORT (Checkbox)
   void _showSportFilter(BuildContext context) {
@@ -243,7 +238,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                     onChanged: (value) async {
                       if (value == null) {
                         return;
-                      } else if (value == '30_days' || value=='all') {
+                      } else if (value == '7_days' || value=='all') {
                         setState(() {
                           _timeFilterType = value;
                           _customDateRange = null;
@@ -263,8 +258,8 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                           contentPadding: EdgeInsets.zero,
                         ),
                         const RadioListTile<String>(
-                          title: Text('30 Hari Terakhir'),
-                          value: '30_days',
+                          title: Text('7 Hari Kedepan'),
+                          value: '7_days',
                           contentPadding: EdgeInsets.zero,
                         ),
                         RadioListTile<String>(

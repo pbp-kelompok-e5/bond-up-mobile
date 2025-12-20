@@ -4,16 +4,15 @@ import 'package:provider/provider.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/services/event_discovery_service.dart';
-import 'package:bond_up_mobile/main.dart';
 import 'package:bond_up_mobile/core/widgets/navigation/app_drawer.dart';
-import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
-import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
+
 
 
 class EventDetailScreen extends StatefulWidget{
   final Event event;
   const EventDetailScreen({super.key, required this.event});
 
+  @override
   State<EventDetailScreen> createState() => _EventDetailScreen();
 }
 
@@ -55,37 +54,6 @@ class _EventDetailScreen extends State<EventDetailScreen>{
     }
   }
 
-  // Logout
-  Future<void> _handleLogout() async {
-    // Mengambil request dari provider
-    final request = context.read<CookieRequest>();
-    final authService = AuthService(request);
-
-    // Melakukan logout ke backend
-    await authService.logout();
-
-    // Cek apakah widget masih aktif sebelum menggunakan context
-    if (!mounted) return;
-
-    // Menampilkan pesan sukses
-    try {
-      // Asumsi kamu punya class ToastUtils di design_system.dart
-      ToastUtils.showSuccess(context, 'Logged out successfully');
-    } catch (e) {
-      // Fallback jika ToastUtils belum siap
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out successfully')),
-      );
-    }
-
-    // Navigasi kembali ke Login Screen dan menghapus history route sebelumnya
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
-  }
 
   Future<void> _fetchStatus() async {
     // Fetch user status ('joined', 'not_participating', etc.)
@@ -142,13 +110,6 @@ class _EventDetailScreen extends State<EventDetailScreen>{
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         title: const Text("Event Detail"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: _handleLogout,
-          ),
-        ],
       ),
       drawer: const AppDrawer(),
       body: Column(
@@ -178,7 +139,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
                         ),
                       )
                           : Container(
-                        color: Colors.blueAccent.withOpacity(0.2),
+                        color: Colors.blueAccent.withValues(alpha: 0.2),
                         child: const Icon(Icons.event, size: 60, color: Colors.blueAccent),
                       ),
                     ),
@@ -272,7 +233,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),

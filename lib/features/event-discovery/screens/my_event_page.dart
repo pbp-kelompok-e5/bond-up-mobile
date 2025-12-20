@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/services/event_discovery_service.dart';
-import 'package:bond_up_mobile/main.dart';
 import 'package:bond_up_mobile/features/event-discovery/widget/my_event_filterbar.dart';
 import 'package:bond_up_mobile/features/event-discovery/screens/event_detail.page.dart';
 import 'package:bond_up_mobile/core/widgets/navigation/app_drawer.dart';
-import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
-import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
 
 import '../widget/event_tile.dart';
 
@@ -41,38 +37,6 @@ class _MyEventScreen extends State<MyEventScreen>{
     final request = context.read<CookieRequest>();
     _service = EventDiscoveryService(request);
     _fetchMyEvents();
-  }
-
-  // Logout
-  Future<void> _handleLogout() async {
-    // Mengambil request dari provider
-    final request = context.read<CookieRequest>();
-    final authService = AuthService(request);
-
-    // Melakukan logout ke backend
-    await authService.logout();
-
-    // Cek apakah widget masih aktif sebelum menggunakan context
-    if (!mounted) return;
-
-    // Menampilkan pesan sukses
-    try {
-      // Asumsi kamu punya class ToastUtils di design_system.dart
-      ToastUtils.showSuccess(context, 'Logged out successfully');
-    } catch (e) {
-      // Fallback jika ToastUtils belum siap
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out successfully')),
-      );
-    }
-
-    // Navigasi kembali ke Login Screen dan menghapus history route sebelumnya
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
   }
 
   Future<void> _fetchMyEvents() async {
@@ -171,14 +135,6 @@ class _MyEventScreen extends State<MyEventScreen>{
         // foregroundColor memaksa semua text dan icon di AppBar (termasuk drawer) menjadi Putih
         foregroundColor: Colors.white,
         title: const Text("My Events"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            // Aksi saat tombol logout ditekan
-            onPressed: _handleLogout,
-          ),
-        ],
       ),
       drawer: const AppDrawer(),
       body: Column(

@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:bond_up_mobile/app/app_theme.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
-
 
 class EventCard extends StatelessWidget {
   final Event event;
   final VoidCallback onTap;
 
   const EventCard(
-      {Key? key, required this.event, required this.onTap}) : super(key: key)
+      {super.key, required this.event, required this.onTap})
   ;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
