@@ -34,13 +34,17 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) {
             final request = context.read<CookieRequest>();
-            return BrowseUsersProvider(PartnerMatchingService(request));
+            return BrowseUsersProvider(
+              PartnerMatchingService(request),
+            );
           },
         ),
         ChangeNotifierProvider(
           create: (context) {
             final request = context.read<CookieRequest>();
-            return ConnectionsProvider(PartnerMatchingService(request));
+            return ConnectionsProvider(
+              PartnerMatchingService(request)
+            );
           },
         ),
       ],
