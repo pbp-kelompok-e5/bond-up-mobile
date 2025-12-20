@@ -8,9 +8,15 @@ import 'participants_page.dart';
 import 'event_form_page.dart';
 import '../services/event_service.dart';
 
+/// Layar yang menampilkan informasi detail dari satu acara tertentu.
+///
+/// Memungkinkan penyelenggara untuk mengubah, membatalkan, atau menghapus acara.
+/// Juga menyediakan navigasi ke halaman manajemen peserta.
 class EventDetailPage extends StatefulWidget {
+  /// Objek acara yang akan ditampilkan.
   final Event event;
 
+  /// Membuat [EventDetailPage] dengan [event] yang diberikan.
   const EventDetailPage({super.key, required this.event});
 
   @override
@@ -18,7 +24,10 @@ class EventDetailPage extends StatefulWidget {
 }
 
 class _EventDetailPageState extends State<EventDetailPage> {
+  /// Data acara yang ditampilkan pada halaman ini.
   late Event event;
+
+  /// Layanan (service) untuk panggilan API terkait acara.
   late EventService service;
 
   @override
@@ -30,10 +39,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Menginisialisasi EventService menggunakan CookieRequest dari context.
     final request = context.watch<CookieRequest>();
     service = EventService(request);
   }
 
+  /// Memperbarui data acara dengan mengambil detail terbaru dari API.
   void _refreshEvent() async {
     final updatedEvent = await service.fetchEventDetail(event.id);
     setState(() {
@@ -42,7 +53,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(context) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -54,6 +65,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             floating: false,
             backgroundColor: AppColors.deepSea,
             iconTheme: const IconThemeData(color: Colors.white),
+            // Membangun tombol aksi untuk app bar berdasarkan status acara.
             actions: _buildAppBarActions(),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
@@ -91,6 +103,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       ),
                       const SizedBox(height: 24),
                       const Divider(),
+                      // Membangun baris untuk menampilkan detail acara (ikon, label, nilai).
                       _buildDetailRow(
                         theme,
                         icon: Icons.sports_soccer,
@@ -132,7 +145,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         icon: Icons.info_outline,
                         label: "Status",
                         value: event.status.toUpperCase(),
-                        isStatus: true,
+                        isStatus: true, // Styling khusus untuk kolom status
                       ),
                       const SizedBox(height: 30),
                     ],
@@ -165,28 +178,36 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
+  /// Membangun tombol aksi yang ditampilkan di app bar (edit, cancel, delete).
+  ///
+  /// Aksi bersifat kondisional berdasarkan status acara.
   List<Widget> _buildAppBarActions() {
     return [
+      // Tombol edit hanya ditampilkan untuk acara yang akan datang (upcoming).
       if (event.status == "upcoming")
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: "Edit Event",
           onPressed: () async {
+            // Navigasi ke EventFormPage untuk pengubahan dan refresh jika berhasil.
             final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => EventFormPage(event: event)),
             );
             if (result == true && mounted) {
               _refreshEvent();
-              Navigator.pop(context, true); // Pop back to MyEventsPage with update flag
+              // Kembali ke MyEventsPage dengan flag pembaruan.
+              Navigator.pop(context, true);
             }
           },
         ),
+      // Tombol cancel hanya ditampilkan untuk acara yang akan datang (upcoming).
       if (event.status == "upcoming")
         IconButton(
           icon: const Icon(Icons.cancel),
           tooltip: "Cancel Event",
           onPressed: () async {
+            // Tampilkan dialog konfirmasi sebelum membatalkan.
             final confirm = await _showConfirmationDialog(
               title: "Confirm Cancellation",
               content: "Are you sure you want to cancel this event?",
@@ -197,14 +218,17 @@ class _EventDetailPageState extends State<EventDetailPage> {
               final res = await service.cancelEvent(event.id);
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res["message"])));
-              Navigator.pop(context, true); // Pop back to MyEventsPage with update flag
+              // Kembali ke MyEventsPage dengan flag pembaruan.
+              Navigator.pop(context, true);
             }
           },
         ),
+      // Tombol delete selalu ditampilkan.
       IconButton(
         icon: const Icon(Icons.delete),
         tooltip: "Delete Event",
         onPressed: () async {
+          // Tampilkan dialog konfirmasi sebelum menghapus.
           final confirm = await _showConfirmationDialog(
             title: "Confirm Deletion",
             content: "Are you sure you want to permanently delete this event?",
@@ -215,18 +239,26 @@ class _EventDetailPageState extends State<EventDetailPage> {
             final res = await service.deleteEvent(event.id);
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res["message"])));
-            Navigator.pop(context, true); // Pop back to MyEventsPage with update flag
+            // Kembali ke MyEventsPage dengan flag pembaruan.
+            Navigator.pop(context, true);
           }
         },
       ),
     ];
   }
 
+  /// Membangun baris untuk menampilkan satu detail acara.
+  ///
+  /// Mencakup [icon], [label], dan [value].
+  /// Jika [isStatus] bernilai true, warna teks nilai akan berubah berdasarkan statusnya.
   Widget _buildDetailRow(ThemeData theme,
       {required IconData icon, required String label, required String value, bool isStatus = false}) {
     Color statusColor;
     switch (value.toLowerCase()) {
       case 'upcoming':
+        statusColor = AppColors.statusActive;
+        break;
+      case 'open':
         statusColor = AppColors.statusActive;
         break;
       case 'cancelled':
@@ -271,6 +303,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
+  /// Menampilkan dialog konfirmasi kepada pengguna.
+  ///
+  /// Menerima [title], [content], serta opsional [confirmText] dan flag [isDestructive].
+  /// Mengembalikan `true` jika pengguna mengonfirmasi, dan `false` jika tidak.
   Future<bool> _showConfirmationDialog({
     required String title,
     required String content,
