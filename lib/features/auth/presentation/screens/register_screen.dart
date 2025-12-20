@@ -96,11 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      backgroundColor: AppColors.white,
-=======
       backgroundColor: AppColors.deepSea,
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
       appBar: AppBar(
         title: const Text('Register'),
         leading: IconButton(
@@ -111,15 +107,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-<<<<<<< HEAD
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-=======
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 500),
@@ -129,7 +116,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                   // Title
                   Text(
                     'Create Account',
@@ -143,11 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Join BondUp and find your sports partner',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-<<<<<<< HEAD
-                          color: AppColors.gray600,
-=======
                           color: AppColors.white.withValues(alpha: 0.8),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -158,11 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _usernameController,
                     label: 'Username',
                     hint: 'Choose a username',
-<<<<<<< HEAD
-                    prefixIcon: const Icon(Icons.person_outline),
-=======
                     prefixIcon: const Icon(Icons.person_outline, color: AppColors.white),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a username';
@@ -181,11 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Password',
                     hint: 'Create a password',
                     obscureText: true,
-<<<<<<< HEAD
-                    prefixIcon: const Icon(Icons.lock_outline),
-=======
                     prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a password';
@@ -204,11 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Confirm Password',
                     hint: 'Re-enter your password',
                     obscureText: true,
-<<<<<<< HEAD
-                    prefixIcon: const Icon(Icons.lock_outline),
-=======
                     prefixIcon: const Icon(Icons.lock_outline, color: AppColors.white),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please confirm your password';
@@ -235,13 +205,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         'Already have an account? ',
-<<<<<<< HEAD
-                        style: Theme.of(context).textTheme.bodyMedium,
-=======
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppColors.white,
                             ),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                       ),
                       GestureDetector(
                         onTap: () {
@@ -257,12 +223,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ],
                   ),
-<<<<<<< HEAD
-                ],
-=======
                   ],
                 ),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
               ),
             ),
           ),

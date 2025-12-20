@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:pbp_django_auth/pbp_django_auth.dart';
-=======
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
 import 'package:provider/provider.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
@@ -30,12 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-<<<<<<< HEAD
-    final request = context.read<CookieRequest>();
-    final authService = AuthService(request);
-=======
     final authService = context.read<AuthService>();
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
 
     // Check if user is logged in
     final isLoggedIn = await authService.isLoggedIn();
@@ -91,11 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'Find Your Sports Partner',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-<<<<<<< HEAD
-                    color: AppColors.white.withOpacity(0.8),
-=======
                     color: AppColors.white.withValues(alpha: 0.8),
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
                   ),
             ),
             const SizedBox(height: 48),
