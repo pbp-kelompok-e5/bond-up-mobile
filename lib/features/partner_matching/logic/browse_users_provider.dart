@@ -1,23 +1,17 @@
-import 'package:bond_up_mobile/features/partner_matching/data/model/user_match_model.dart';
+import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:flutter/material.dart';
-import '../../../features/partner_matching/data/datasources/partner_matching_remote_datasource.dart';
+import '../data/services/partner_matching_service.dart';
 
 class BrowseUsersProvider extends ChangeNotifier {
-  final PartnerMatchingRemoteDataSource dataSource;
+  final PartnerMatchingService dataSource;
 
   // Constructor menerima datasource (Dependency Injection)
   BrowseUsersProvider(this.dataSource);
 
-  // STATE VARIABLES 
+  // STATE VARIABLES
   List<UserMatchModel> _users = [];
   bool _isLoading = false;
   String _errorMessage = '';
-
-  Map<String, List<Map<String, String>>> filters = {
-    'sports': [],
-    'skills': [],
-    'city': [],
-  };
 
   String _selectedSport = '';
   String _selectedSkill = '';
@@ -28,22 +22,9 @@ class BrowseUsersProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  Map<String, List<Map<String, String>>> get getFilters => filters;
   String get selectedSport => _selectedSport;
   String get selectedSkill => _selectedSkill;
   String get selectedCity => _selectedCity;
-
-  Future<void> loadFiltersOptions() async {
-    if (filters['sports']!.isNotEmpty) return;
-
-    try {
-      final options = await dataSource.fetchFilterOptions();
-      filters = options;
-      notifyListeners();
-    } catch (e) {
-      print("Fail to load filter options: $e");
-    }
-  }
 
   void applyFilters({String? sport, String? skill, String? city}) {
     if (sport != null) _selectedSport = sport;

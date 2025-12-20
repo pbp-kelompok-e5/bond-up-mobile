@@ -1,14 +1,14 @@
-import 'package:bond_up_mobile/features/partner_matching/data/model/user_match_model.dart';
+import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import '../model/user_match_model.dart';
-import '../model/connection_model.dart';
-import '../model/profile_detail_model.dart';
+import '../models/connection_model.dart';
+import '../models/profile_detail_model.dart';
 
-class PartnerMatchingRemoteDataSource {
+class PartnerMatchingService {
   final CookieRequest request;
   final String baseUrl = "http://localhost:8000";
 
-  PartnerMatchingRemoteDataSource(this.request);
+  PartnerMatchingService(this.request);
 
   // 1. Fetch Users (Browse)
   Future<List<UserMatchModel>> fetchUsers({
@@ -25,9 +25,9 @@ class PartnerMatchingRemoteDataSource {
       'city': city,
     };
 
-    final String url = Uri.parse('$baseUrl/partner-matching/browse-users-api/')
-        .replace(queryParameters: queryParams)
-        .toString();
+    final String url = Uri.parse(
+      '$baseUrl/partner-matching/browse-users-api/',
+    ).replace(queryParameters: queryParams).toString();
 
     try {
       // request.get() langsung mengembalikan JSON (dynamic)
@@ -37,7 +37,7 @@ class PartnerMatchingRemoteDataSource {
       if (response != null) {
         // Langsung akses key 'users' tanpa json.decode
         List<dynamic> usersJson = response['users'];
-        
+
         return usersJson.map((json) => UserMatchModel.fromJson(json)).toList();
       } else {
         throw Exception('Response kosong dari server');
@@ -67,7 +67,8 @@ class PartnerMatchingRemoteDataSource {
 
   // 3. Connection Actions (Connect, Accept, Reject, Remove, Cancel)
   Future<bool> sendConnectionAction(String action, int userId) async {
-    final String url = '$baseUrl/partner-matching/connection/$action/user/$userId/';
+    final String url =
+        '$baseUrl/partner-matching/connection/$action/user/$userId/';
 
     try {
       // request.post() butuh body berupa Map (JSON)
@@ -78,11 +79,11 @@ class PartnerMatchingRemoteDataSource {
       if (response['success'] == true) {
         return true;
       } else {
-        print("Action failed: ${response['error']}");
+        debugPrint("Action failed: ${response['error']}");
         return false;
       }
     } catch (e) {
-      print("Error sending action: $e");
+      debugPrint("Error sending action: $e");
       return false;
     }
   }
@@ -92,17 +93,32 @@ class PartnerMatchingRemoteDataSource {
 
     try {
       final response = await request.get(url);
-      
+
       // Response udah otomatis di-decode jadi Map/List dengan pbp_django_auth
       return {
         'cities': List<Map<String, String>>.from(
-            response['cities'].map((x) => {'value': x['value'].toString(), 'label': x['label'].toString()})
+          response['cities'].map(
+            (x) => {
+              'value': x['value'].toString(),
+              'label': x['label'].toString(),
+            },
+          ),
         ),
         'sports': List<Map<String, String>>.from(
-            response['sports'].map((x) => {'value': x['value'].toString(), 'label': x['label'].toString()})
+          response['sports'].map(
+            (x) => {
+              'value': x['value'].toString(),
+              'label': x['label'].toString(),
+            },
+          ),
         ),
         'skills': List<Map<String, String>>.from(
-            response['skills'].map((x) => {'value': x['value'].toString(), 'label': x['label'].toString()})
+          response['skills'].map(
+            (x) => {
+              'value': x['value'].toString(),
+              'label': x['label'].toString(),
+            },
+          ),
         ),
       };
     } catch (e) {
@@ -125,6 +141,4 @@ class PartnerMatchingRemoteDataSource {
       throw Exception('Error fetching profile: $e');
     }
   }
-
-  
 }
