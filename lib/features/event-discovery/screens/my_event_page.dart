@@ -84,7 +84,6 @@ class _MyEventScreen extends State<MyEventScreen>{
       if (mounted) {
         setState(() {
           _allEvents = events;
-          _filteredEvents = events; // Awalnya tampilkan semua
           _isLoading = false;
         });
         // Terapkan filter jika ada state filter tersimpan (opsional)
