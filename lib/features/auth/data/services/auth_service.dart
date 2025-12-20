@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import 'dart:convert';
-=======
 ﻿import 'dart:convert';
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bond_up_mobile/features/auth/data/models/auth_response.dart';
@@ -14,11 +10,7 @@ class AuthService {
   // For Android emulator: http://10.0.2.2:8000
   // For web/Chrome: http://localhost:8000
   // For production: https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id
-<<<<<<< HEAD
-  static const String baseUrl = 'http://localhost:8000';
-=======
   static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id/';
->>>>>>> 5b6033e392d1d03612b89f4c721dbbe03549a053
   
   final CookieRequest request;
 
