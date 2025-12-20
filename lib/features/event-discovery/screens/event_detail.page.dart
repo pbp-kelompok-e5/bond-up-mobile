@@ -111,7 +111,6 @@ class _EventDetailScreen extends State<EventDetailScreen>{
         foregroundColor: Colors.white,
         title: const Text("Event Detail"),
       ),
-      drawer: const AppDrawer(),
       body: Column(
         children: [
           // Scrollable Content wrapped in RefreshIndicator

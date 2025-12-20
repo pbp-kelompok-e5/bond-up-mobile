@@ -42,7 +42,7 @@ class _MyEventScreen extends State<MyEventScreen>{
   Future<void> _fetchMyEvents() async {
     try {
       final request = context.read<CookieRequest>();
-      // Menggunakan service fetchMyEvents yang sudah Anda buat
+      // Menggunakan service fetchMyEvents
       final events = await _service.fetchMyEvents(request);
 
       if (mounted) {
@@ -50,7 +50,6 @@ class _MyEventScreen extends State<MyEventScreen>{
           _allEvents = events;
           _isLoading = false;
         });
-        // Terapkan filter jika ada state filter tersimpan (opsional)
         _applyFilters();
       }
     } catch (e) {

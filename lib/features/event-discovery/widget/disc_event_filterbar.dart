@@ -425,9 +425,9 @@ class _FilterChipButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.green.shade50 : Colors.grey.shade100, // TODO UPDATE
+          color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isActive ? Colors.green : Colors.grey.shade300),
+          border: Border.all(color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey.shade300),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -435,12 +435,12 @@ class _FilterChipButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.green.shade700 : Colors.black87,
+                color: isActive ? Theme.of(context).colorScheme.primary : Colors.black87,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down, size: 18, color: isActive ? Colors.green.shade700 : Colors.black54),
+            Icon(Icons.keyboard_arrow_down, size: 18, color: isActive ? Theme.of(context).colorScheme.primary : Colors.black54),
           ],
         ),
       ),

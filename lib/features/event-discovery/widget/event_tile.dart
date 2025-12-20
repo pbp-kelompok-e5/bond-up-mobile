@@ -155,7 +155,7 @@ class EventCard extends StatelessWidget {
         // For production: https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id
         child: hasImage
             ? Image.network(
-          'http://localhost:8000/proxy-image/?url=${Uri.encodeComponent(event.thumbnail ?? '')}',
+            event.thumbnail!,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             // Fallback jika URL rusak
