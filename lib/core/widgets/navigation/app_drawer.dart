@@ -10,6 +10,7 @@ import 'package:bond_up_mobile/features/event-discovery/screens/event_dicovery_h
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
+import 'package:bond_up_mobile/features/event-management/screens/event_history_page.dart';
 import 'package:bond_up_mobile/features/partner_matching/presentation/screens/browse_users_screen.dart';
 
 /// App-wide navigation drawer
@@ -88,10 +89,19 @@ class AppDrawer extends StatelessWidget {
                   _buildModernDrawerItem(
                     context: context,
                     icon: Icons.calendar_month_rounded,
-                    title: 'Events',
+                    title: 'Manage Events',
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const MyEventsPage()));
+                    },
+                  ),
+                  _buildModernDrawerItem(
+                    context: context,
+                    icon: Icons.history_rounded,
+                    title: 'Event History',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EventHistoryPage()));
                     },
                   ),
                   _buildModernDrawerItem(

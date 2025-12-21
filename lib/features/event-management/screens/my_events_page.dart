@@ -45,7 +45,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Events'),
+        title: const Text('Manage Event'),
         actions: [
           // Tombol penyegar (refresh) di app bar.
           IconButton(
