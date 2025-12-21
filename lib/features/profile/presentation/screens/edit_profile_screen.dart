@@ -23,7 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _fullNameController;
   late TextEditingController _bioController;
-  late String _selectedCity;
+  late String? _selectedCity;
   bool _isLoading = false;
 
   @override
@@ -31,7 +31,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
     _fullNameController = TextEditingController(text: widget.profile.fullName);
     _bioController = TextEditingController(text: widget.profile.bio);
-    _selectedCity = widget.profile.city;
+    // Only set city if it's not empty and exists in the city choices
+    final profileCity = widget.profile.city;
+    _selectedCity = (profileCity.isNotEmpty && AppConstants.cityChoices.containsKey(profileCity))
+        ? profileCity
+        : null;
   }
 
   @override
@@ -56,7 +60,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final response = await profileService.updateProfile(
       fullName: _fullNameController.text.trim(),
       bio: _bioController.text.trim(),
-      city: _selectedCity,
+      city: _selectedCity ?? '',
     );
 
     if (!mounted) return;
@@ -158,7 +162,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      initialValue: _selectedCity,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: AppColors.deepSeaLight,
@@ -173,6 +176,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       dropdownColor: AppColors.deepSeaLight,
                       style: const TextStyle(color: Colors.white),
+                      hint: const Text(
+                        'Select your city',
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                      value: _selectedCity,
                       items: AppConstants.sortedCities.map((entry) {
                         return DropdownMenuItem<String>(
                           value: entry.key,
@@ -180,11 +188,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         );
                       }).toList(),
                       onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedCity = value;
-                          });
-                        }
+                        setState(() {
+                          _selectedCity = value;
+                        });
                       },
                       validator: (value) {
                         if (value == null || value.isEmpty) {

@@ -119,17 +119,25 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     final request = context.read<CookieRequest>();
 
     try {
-      // Fetch this user's public connections
-      // Note: We'll try to get connections from the partner-matching profile endpoint
-      final partnerMatchingService = PartnerMatchingService(request);
-      final profileDetail = await partnerMatchingService.fetchUserProfile(widget.userId);
+      // Fetch public connections for this specific user
+      final response = await request.get(
+        '${ApiConstants.baseUrl}/partner-matching/profile/${widget.userId}/connections/api/',
+      );
 
       if (!mounted) return;
 
-      // For now, we'll leave connections empty as we need a dedicated endpoint
-      // The user may need to add an API endpoint to get public connections
       setState(() {
-        _recentConnections = [];
+        // Parse connections (limit to 3 most recent friends)
+        if (response['status'] == 'success' && response['my_friends'] != null) {
+          final connectionsList = <UserMatchModel>[];
+          for (var d in response['my_friends']) {
+            if (d != null) {
+              connectionsList.add(UserMatchModel.fromJson(d));
+            }
+          }
+          _recentConnections = connectionsList.take(3).toList();
+        }
+
         _isLoadingConnections = false;
       });
     } catch (e) {
