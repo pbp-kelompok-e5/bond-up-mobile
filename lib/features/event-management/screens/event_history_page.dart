@@ -58,8 +58,7 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 1. Background Halaman: Dark Gray (Sesuai permintaan)
-      backgroundColor: AppColors.darkGrayBackground, 
+      backgroundColor: AppColors.gray50,  
       
       appBar: AppBar(
         title: const Text(
@@ -67,7 +66,7 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         // AppBar menyatu dengan background halaman
-        backgroundColor: AppColors.darkGrayBackground, 
+        backgroundColor: AppColors.darkGrayBackground,  
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -112,7 +111,7 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
               // Background icon menggunakan Deep Sea agar kontras dengan Dark Gray
-              color: AppColors.deepSea, 
+              color: AppColors.deepSea,  
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -148,7 +147,7 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
     return Container(
       decoration: BoxDecoration(
         // 2. Warna Kartu: Deep Sea (Biru Gelap)
-        color: AppColors.deepSea, 
+        color: AppColors.deepSea,  
         borderRadius: BorderRadius.circular(16),
         // Bayangan untuk memisahkan kartu dari background abu-abu
         boxShadow: [
