@@ -1,8 +1,8 @@
-import 'dart:math'; 
+import 'dart:math';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:flutter/material.dart';
-import '../screens/user_profile_screen.dart';
+import 'package:bond_up_mobile/features/profile/presentation/screens/public_profile_screen.dart';
 import 'package:bond_up_mobile/core/constants/app_constants.dart';
 
 class UserCard extends StatelessWidget {
@@ -17,7 +17,7 @@ class UserCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UserProfileScreen(userId: user.id),
+            builder: (context) => PublicProfileScreen(userId: user.id),
           ),
         );
       },

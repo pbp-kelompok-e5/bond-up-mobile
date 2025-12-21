@@ -10,6 +10,12 @@ import 'package:bond_up_mobile/features/profile/presentation/widgets/user_stats_
 import 'package:bond_up_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:bond_up_mobile/features/profile/presentation/widgets/add_sport_preference_dialog.dart';
 import 'package:bond_up_mobile/features/profile/presentation/widgets/upload_image_dialog.dart';
+import 'package:bond_up_mobile/features/reviews/data/models/user_review.dart';
+import 'package:bond_up_mobile/features/reviews/data/models/user_written_review.dart';
+import 'package:bond_up_mobile/features/reviews/presentation/screens/user_written_reviews_page.dart';
+import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
+import 'package:bond_up_mobile/features/partner_matching/presentation/screens/my_connections_screen.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 /// Screen for viewing the current user's own profile
 class ProfileScreen extends StatefulWidget {
@@ -23,6 +29,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserProfileModel? _profile;
   bool _isLoading = true;
   String? _errorMessage;
+  List<UserReview> _recentReceivedReviews = [];
+  List<UserWrittenReview> _recentWrittenReviews = [];
+  bool _isLoadingReviews = false;
+  List<UserMatchModel> _recentConnections = [];
+  bool _isLoadingConnections = false;
 
   @override
   void initState() {
@@ -48,11 +59,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profile = response.data;
         _isLoading = false;
       });
+      // Load reviews and connections after profile is loaded
+      _loadReviews();
+      _loadConnections();
     } else {
       setState(() {
         _errorMessage = response.message;
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadReviews() async {
+    if (_profile == null) return;
+
+    setState(() {
+      _isLoadingReviews = true;
+    });
+
+    final request = context.read<CookieRequest>();
+
+    try {
+      // Fetch received reviews
+      final receivedResponse = await request.get(
+        '${ApiConstants.baseUrl}/reviews/api/user/${_profile!.userId}/',
+      );
+
+      // Fetch written reviews
+      final writtenResponse = await request.get(
+        '${ApiConstants.baseUrl}/reviews/api/my-reviews/',
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        // Parse received reviews (limit to 3 most recent)
+        if (receivedResponse['status'] == 'success') {
+          final receivedList = <UserReview>[];
+          for (var d in receivedResponse['data']) {
+            if (d != null) {
+              receivedList.add(UserReview.fromJson(d));
+            }
+          }
+          _recentReceivedReviews = receivedList.take(3).toList();
+        }
+
+        // Parse written reviews (limit to 3 most recent)
+        if (writtenResponse['status'] == 'success') {
+          final writtenList = <UserWrittenReview>[];
+          for (var d in writtenResponse['data']) {
+            if (d != null) {
+              writtenList.add(UserWrittenReview.fromJson(d));
+            }
+          }
+          _recentWrittenReviews = writtenList.take(3).toList();
+        }
+
+        _isLoadingReviews = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingReviews = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadConnections() async {
+    setState(() {
+      _isLoadingConnections = true;
+    });
+
+    final request = context.read<CookieRequest>();
+
+    try {
+      // Fetch connections
+      final response = await request.get(
+        '${ApiConstants.baseUrl}/partner-matching/connections/api/',
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        // Parse connections (limit to 3 most recent friends)
+        if (response['status'] == 'success' && response['my_friends'] != null) {
+          final connectionsList = <UserMatchModel>[];
+          for (var d in response['my_friends']) {
+            if (d != null) {
+              connectionsList.add(UserMatchModel.fromJson(d));
+            }
+          }
+          _recentConnections = connectionsList.take(3).toList();
+        }
+
+        _isLoadingConnections = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingConnections = false;
+        });
+      }
     }
   }
 
@@ -287,6 +395,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 24),
             _buildSportPreferencesSection(),
+            const SizedBox(height: 24),
+            _buildConnectionsSection(),
+            const SizedBox(height: 24),
+            _buildReviewsSection(),
             if (_profile!.bio.isNotEmpty) ...[
               const SizedBox(height: 24),
               _buildBioSection(),
@@ -444,6 +556,361 @@ class _ProfileScreenState extends State<ProfileScreen> {
           fontSize: 16,
           color: Colors.white70,
           height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConnectionsSection() {
+    return DeepSeaCard(
+      header: Row(
+        children: [
+          const Text(
+            '👥',
+            style: TextStyle(fontSize: 24),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'Connections',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyConnectionsScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'View All',
+              style: TextStyle(
+                color: AppColors.orangeSport,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: _isLoadingConnections
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(
+                  color: AppColors.orangeSport,
+                ),
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (_recentConnections.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'No connections yet.',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  )
+                else
+                  ..._recentConnections.map((connection) => _buildConnectionItem(connection)),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildConnectionItem(UserMatchModel connection) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.deepSeaLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // Profile picture
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: AppColors.orangeSport,
+            backgroundImage: connection.profilePictureUrl.isNotEmpty
+                ? NetworkImage(connection.profilePictureUrl)
+                : null,
+            child: connection.profilePictureUrl.isEmpty
+                ? Text(
+                    connection.fullName.isNotEmpty
+                        ? connection.fullName[0].toUpperCase()
+                        : connection.username[0].toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+          // User info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  connection.fullName.isNotEmpty
+                      ? connection.fullName
+                      : connection.username,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                if (connection.city.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    connection.city,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+                if (connection.sports.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    connection.sports,
+                    style: const TextStyle(
+                      color: AppColors.orangeSport,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    return DeepSeaCard(
+      header: Row(
+        children: [
+          const Text(
+            '⭐',
+            style: TextStyle(fontSize: 24),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'Reviews',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserWrittenReviewsPage(),
+                ),
+              );
+            },
+            child: const Text(
+              'My Written Reviews',
+              style: TextStyle(
+                color: AppColors.orangeSport,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: _isLoadingReviews
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(
+                  color: AppColors.orangeSport,
+                ),
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Received Reviews Section
+                const Text(
+                  'Recent Reviews Received',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.orangeSport,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_recentReceivedReviews.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'No reviews received yet.',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  )
+                else
+                  ..._recentReceivedReviews.map((review) => _buildReceivedReviewItem(review)),
+
+                const SizedBox(height: 20),
+                const Divider(color: Colors.white24),
+                const SizedBox(height: 20),
+
+                // Written Reviews Section
+                const Text(
+                  'Recent Reviews Written',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.orangeSport,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_recentWrittenReviews.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'No reviews written yet.',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  )
+                else
+                  ..._recentWrittenReviews.map((review) => _buildWrittenReviewItem(review)),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildReceivedReviewItem(UserReview review) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.deepSeaLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  review.eventTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              _buildStarRating(review.rating),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'From: ${review.reviewerName}',
+            style: const TextStyle(
+              color: AppColors.orangeSport,
+              fontSize: 12,
+            ),
+          ),
+          if (review.comment.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              review.comment,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWrittenReviewItem(UserWrittenReview review) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.deepSeaLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  review.eventTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              _buildStarRating(review.rating),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'To: ${review.revieweeName}',
+            style: const TextStyle(
+              color: AppColors.orangeSport,
+              fontSize: 12,
+            ),
+          ),
+          if (review.comment.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              review.comment,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStarRating(int rating) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        5,
+        (i) => Icon(
+          i < rating ? Icons.star : Icons.star_border,
+          color: AppColors.orangeSport,
+          size: 16,
         ),
       ),
     );
