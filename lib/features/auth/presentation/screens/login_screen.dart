@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -51,8 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final authService = AuthService(request);
 
     try {
-      TextInput.finishAutofillContext(); 
-
       final response = await authService.login(
         _usernameController.text.trim(),
         _passwordController.text,
@@ -159,10 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: Form(
                           key: _formKey,
-                          child: AutofillGroup(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
                                 Text(
                                   'Welcome Back!',
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -233,7 +229,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                      ),
 
                       const SizedBox(height: 32),
 

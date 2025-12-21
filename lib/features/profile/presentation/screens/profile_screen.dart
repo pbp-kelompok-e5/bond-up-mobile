@@ -18,6 +18,7 @@ import 'package:bond_up_mobile/features/profile/presentation/widgets/upload_imag
 import 'package:bond_up_mobile/features/reviews/data/models/user_review.dart';
 import 'package:bond_up_mobile/features/reviews/data/models/user_written_review.dart';
 import 'package:bond_up_mobile/features/reviews/presentation/screens/user_written_reviews_page.dart';
+import 'package:bond_up_mobile/features/reviews/presentation/screens/user_reviews_page.dart';
 import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:bond_up_mobile/features/partner_matching/presentation/screens/my_connections_screen.dart';
 
@@ -573,7 +574,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         // Tab Reviews Received
         DeepSeaCard(
-          header: const Text('Reviews Received', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          header: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Reviews Received', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              GestureDetector(
+                onTap: () {
+                  if (_profile != null) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => UserReviewsPage(userId: _profile!.userId)));
+                  }
+                },
+                child: const Text('See All', style: TextStyle(color: AppColors.orangeSport, fontSize: 14)),
+              ),
+            ],
+          ),
           body: _isLoadingReviews
               ? const SizedBox(height: 50, child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
               : _recentReceivedReviews.isEmpty
