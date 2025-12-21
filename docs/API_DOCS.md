@@ -1,6 +1,6 @@
 # Sigma App - API Documentation
 
-**Base URL:** `https://your-domain.com`  
+**Base URL:** `https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id`  
 **Authentication:** Session-based (Django CSRF + Session Cookie)
 
 ---
@@ -206,9 +206,19 @@
 
 ## Event Discovery
 
+### Browse Events (HTML)
+**GET** `/event-discovery/events/`
+**Auth:** Not required
+
+**Response (200):** HTML page with event listing and filters
+
+---
+
 ### Get All Events (JSON)
 **GET** `/event-discovery/events/json/`
 **Auth:** Not required
+
+**Description:** Returns all upcoming events (future events or events happening today that haven't started yet), ordered by date and time.
 
 **Response (200):**
 ```json
@@ -233,6 +243,14 @@
   }
 ]
 ```
+
+---
+
+### Get Event Detail (HTML)
+**GET** `/event-discovery/events/<id>/`
+**Auth:** Not required
+
+**Response (200):** HTML page with event details
 
 ---
 
@@ -262,27 +280,76 @@
 }
 ```
 
+**Response (404):**
+```json
+{
+  "error": "Event not found"
+}
+```
+
 ---
 
 ### Join Event
-**POST** `/event-discovery/events/<id>/join`
+**POST** `/event-discovery/events/<id>/join/`
 **Auth:** Required
+**CSRF:** Exempt
 
-**Response (200):** Redirect to event detail
+**Response (201):**
+```json
+{
+  "message": "Joined"
+}
+```
+
+**Response (400):**
+```json
+{
+  "message": "Event is full"
+}
+```
+or
+```json
+{
+  "message": "Could not join"
+}
+```
 
 ---
 
 ### Leave Event
-**DELETE** `/event-discovery/events/<id>/leave`
+**POST** `/event-discovery/events/<id>/leave/`
+**Auth:** Required
+**CSRF:** Exempt
+
+**Response (201):**
+```json
+{
+  "message": "Left"
+}
+```
+
+**Response (404):**
+```json
+{
+  "message": "Not Found"
+}
+```
+
+---
+
+### Get My Joined Events (HTML)
+**GET** `/event-discovery/events/my-joined/`
 **Auth:** Required
 
-**Response (200):** Redirect to event detail
+**Response (200):** HTML page with user's joined events
 
 ---
 
 ### Get My Joined Events (JSON)
-**GET** `/event-discovery/events/my-joined/json`
+**GET** `/event-discovery/events/my-joined/json/`
 **Auth:** Required
+
+**Description:** Returns all events the current user has joined as a participant.
 
 **Response (200):**
 ```json
@@ -314,12 +381,80 @@
 **GET** `/event-discovery/events/<id>/participant-status/`
 **Auth:** Required
 
+**Description:** Check if the current user is participating in the event and their participation status.
+
 **Response (200):**
 ```json
 {
-  "is_participant": true,
   "status": "joined"
 }
+```
+or
+```json
+{
+  "status": "attended"
+}
+```
+or
+```json
+{
+  "status": "not_participating"
+}
+```
+
+**Note:** Possible status values: `joined`, `attended`, `cancelled`, `not_participating`
+
+---
+
+### Check Event Has Attended Participants
+**GET** `/event-discovery/events/<id>/has-attended-participants/`
+**Auth:** Required
+
+**Description:** Check if the event has any attended participants (excluding the current user). Used to determine if reviews can be submitted.
+
+**Response (200):**
+```json
+{
+  "has_attended_participants": true
+}
+```
+
+---
+
+### Check User Has Reviewed Event
+**GET** `/event-discovery/events/<id>/user-has-reviewed/`
+**Auth:** Required
+
+**Description:** Check if the current user has already submitted reviews for participants in this event.
+
+**Response (200):**
+```json
+{
+  "has_reviewed": true
+}
+```
+
+---
+
+### Proxy Image
+**GET** `/event-discovery/proxy-image/?url=<image_url>`
+**Auth:** Not required
+
+**Description:** Proxy endpoint to fetch and serve external images (used for event thumbnails).
+
+**Query Parameters:**
+- `url` (required): The external image URL to fetch
+
+**Response (200):** Image content with appropriate Content-Type header
+
+**Response (400):**
+```
+No URL provided
+```
+
+**Response (500):**
+```
+Error fetching image: <error_message>
 ```
 
 ---
