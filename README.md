@@ -4,6 +4,10 @@
 
 BondUp adalah aplikasi mobile berbasis Flutter yang menghubungkan para penggemar olahraga untuk menemukan partner olahraga, mengikuti event, dan membangun komunitas aktif. Aplikasi ini merupakan versi mobile dari web application yang telah dikembangkan pada Proyek Tengah Semester.
 
+## 🎥 Promotion Video
+
+**Watch our app in action:** [BondUp Mobile Demo](https://drive.google.com/drive/folders/1HkFDwpYlSfLWhd6_SZWATPX6xpubZerg?usp=sharing)
+
 ---
 
 ## Anggota Kelompok
