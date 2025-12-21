@@ -116,8 +116,9 @@ See `lib/core/widgets/cards/deep_sea_card.dart` for implementation details.
 ### Text Fields (`AppTextField`)
 Styled text input component with validation support.
 
-**Features**: Label and hint text, error state, password obscuring, multiline support, custom validation  
+**Features**: Label and hint text, error state, password obscuring with toggle visibility, multiline support, custom validation
 **Styling**: Orange sport accent color, consistent border radius
+**Password Toggle**: Set `enablePasswordToggle: true` with `obscureText: true` to show eye icon for password visibility toggle
 
 See `lib/core/widgets/inputs/app_text_field.dart` for implementation details.
 
