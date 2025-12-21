@@ -19,12 +19,12 @@ class PointsTransactionModel {
   /// Create PointsTransactionModel from JSON
   factory PointsTransactionModel.fromJson(Map<String, dynamic> json) {
     return PointsTransactionModel(
-      id: json['id'] as int,
-      activityType: json['activity_type'] as String,
-      activityLabel: json['activity_label'] as String,
-      points: json['points'] as int,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: int.parse(json['id'].toString()),
+      activityType: json['activity_type']?.toString() ?? '',
+      activityLabel: json['activity_label']?.toString() ?? '',
+      points: int.parse(json['points'].toString()),
+      description: json['description']?.toString() ?? '',
+      createdAt: DateTime.parse(json['created_at'].toString()),
     );
   }
 

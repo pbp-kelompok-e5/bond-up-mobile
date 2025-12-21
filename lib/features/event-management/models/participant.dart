@@ -22,9 +22,9 @@ class Participant {
 
   /// Membuat objek [Participant] dari sebuah Map JSON.
   factory Participant.fromJson(Map<String, dynamic> json) => Participant(
-        userId: json["user_id"],
-        username: json["username"],
-        status: json["status"],
+        userId: int.parse(json["user_id"].toString()),
+        username: json["username"] ?? "",
+        status: json["status"] ?? "",
         joinedAt: DateTime.parse(json["joined_at"]),
       );
 

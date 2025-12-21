@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../models/event.dart';
 import '../models/participant.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 /// URL dasar untuk API manajemen acara.
-const String baseApi = "http://localhost:8000/event-management/api";
+const String baseApi = "${ApiConstants.baseUrl}/event-management/api";
 
 /// Kelas layanan untuk berinteraksi dengan API backend manajemen acara.
 class EventService {

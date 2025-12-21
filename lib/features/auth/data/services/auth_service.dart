@@ -3,6 +3,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bond_up_mobile/features/auth/data/models/auth_response.dart';
 import 'package:bond_up_mobile/features/auth/data/models/user_model.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 /// Authentication service for handling login, register, and logout
 class AuthService {

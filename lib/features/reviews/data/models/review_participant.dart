@@ -11,8 +11,8 @@ class ReviewParticipant {
 
   factory ReviewParticipant.fromJson(Map<String, dynamic> json) {
     return ReviewParticipant(
-      id: json['id'],
-      username: json['username'],
+      id: int.parse(json['id'].toString()),
+      username: json['username'] ?? "",
       profileImageUrl: json['profile_image_url'],
     );
   }

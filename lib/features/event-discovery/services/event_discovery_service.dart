@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../../event-management/models/event.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
-const String baseApi = "http://localhost:8000/event-discovery";
+const String baseApi = "${ApiConstants.baseUrl}/event-discovery";
 
 class EventDiscoveryService {
   final CookieRequest request;

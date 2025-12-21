@@ -207,7 +207,7 @@ class _EventFormPageState extends State<EventFormPage> {
                       ? await service.updateEvent(widget.event!.id, payload)
                       : await service.createEvent(payload);
 
-                  if (!mounted) return;
+                  if (!context.mounted) return;
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(res["message"] ?? "Success")),
@@ -256,7 +256,7 @@ class _EventFormPageState extends State<EventFormPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         decoration: InputDecoration(labelText: label),
         items: items
             .map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value)))

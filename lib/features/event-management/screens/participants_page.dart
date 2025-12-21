@@ -159,7 +159,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
         chipColor = AppColors.statusCompletedBackground;
         break;
       case 'pending':
-        chipColor = AppColors.toastWarningEnd.withOpacity(0.2);
+        chipColor = AppColors.toastWarningEnd.withValues(alpha: 0.2);
         break;
       default:
         chipColor = AppColors.gray200;

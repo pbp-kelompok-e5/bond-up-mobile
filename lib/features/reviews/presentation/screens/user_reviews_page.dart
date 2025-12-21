@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/reviews/data/models/user_review.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 class UserReviewsPage extends StatefulWidget {
   final int userId; // ID user yang ingin dilihat review-nya
@@ -14,11 +15,9 @@ class UserReviewsPage extends StatefulWidget {
 }
 
 class _UserReviewsPageState extends State<UserReviewsPage> {
-  final String baseUrl = "http://localhost:8000";
-
   Future<List<UserReview>> fetchReviewsReceived(CookieRequest request) async {
     // Memanggil endpoint user_reviews di Django
-    final response = await request.get('$baseUrl/reviews/api/user/${widget.userId}/');
+    final response = await request.get('${ApiConstants.baseUrl}/reviews/api/user/${widget.userId}/');
     
     List<UserReview> listReview = [];
     if (response['status'] == 'success') {
