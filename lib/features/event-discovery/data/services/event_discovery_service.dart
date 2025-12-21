@@ -4,7 +4,7 @@ import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 
 class EventDiscoveryService {
-  /// Base URL for API requests - imported from centralized API constants
+  // Use centralized API configuration
   static const String baseUrl = ApiConstants.baseUrl;
 
   final CookieRequest request;
@@ -13,7 +13,7 @@ class EventDiscoveryService {
 
   // Fetch Event List For Event Discovery Page
   Future<List<Event>> fetchEvents(CookieRequest request) async {
-    final response = await request.get('$baseUrl/event-discovery/events/json');
+    final response = await request.get('$baseUrl/event-discovery/events/json/');
     var data = response;
     // Convert JSON to Event Models
     List<Event> listEvent = [];
@@ -28,7 +28,7 @@ class EventDiscoveryService {
   // Fetch Event List For My Event Discovery Page
   Future<List<Event>> fetchMyEvents(CookieRequest request) async {
     final response = await request.get(
-        '$baseUrl/event-discovery/events/my-joined/json');
+        '$baseUrl/event-discovery/events/my-joined/json/');
     var data = response;
     // Convert JSON to Event Models
     List<Event> listEvent = [];
@@ -44,7 +44,7 @@ class EventDiscoveryService {
   Future<bool> joinEvent(int eventId) async {
     try {
       final response = await request.post(
-          '$baseUrl/event-discovery/events/$eventId/join',
+          '$baseUrl/event-discovery/events/$eventId/join/',
           {} // Empty body, ID is in the URL
       );
 
@@ -65,7 +65,7 @@ class EventDiscoveryService {
     try {
       // Using POST as this modifies server state, even though it deletes a record
       final response = await request.post(
-          '$baseUrl/event-discovery/events/$eventId/leave',
+          '$baseUrl/event-discovery/events/$eventId/leave/',
           {}
       );
 
@@ -88,14 +88,21 @@ class EventDiscoveryService {
         '$baseUrl/event-discovery/events/$eventId/participant-status/',
       );
 
-      // The Django view returns: {'status': '...'}
+      // Debug: Print the response to see what we're getting
+      print('DEBUG: Participant status response for event $eventId: $response');
+
+      // The Django view returns: {'status': '...', 'is_participant': true/false}
       if (response != null && response['status'] != null) {
-        return response['status'];
+        final status = response['status'].toString();
+        print('DEBUG: Extracted status: $status');
+        return status;
       }
 
+      print('DEBUG: Response was null or missing status field, returning not_participating');
       return 'not_participating';
     } catch (e) {
       // Fallback in case of error (e.g., not logged in or network issue)
+      print('DEBUG: Error getting participant status: $e');
       return 'not_participating';
     }
   }

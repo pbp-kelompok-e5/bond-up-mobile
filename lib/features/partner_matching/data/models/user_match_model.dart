@@ -36,9 +36,9 @@ class UserMatchModel {
       }
 
       return UserMatchModel(
-        id: json["id"],
-        username: json["username"],
-        fullName: json["full_name"] ?? json["username"], // Fallback ke username kalau nama kosong
+        id: int.parse(json["id"].toString()),
+        username: json["username"] ?? "",
+        fullName: json["full_name"] ?? json["username"] ?? "", // Fallback ke username kalau nama kosong
         city: json["city"] ?? "",
         profilePictureUrl: json["profile_picture_url"] ?? "",
         sports: parseSports(json["sports"]),

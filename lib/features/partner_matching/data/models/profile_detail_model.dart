@@ -22,14 +22,14 @@ class ProfileDetailModel {
   factory ProfileDetailModel.fromJson(Map<String, dynamic> json) {
     var data = json['data']; // Karena JSON kamu dibungkus key 'data'
     return ProfileDetailModel(
-      id: data['id'],
-      username: data['username'],
-      fullName: data['full_name'],
-      city: data['city'],
-      bio: data['bio'],
-      profilePictureUrl: data['profile_picture_url'],
-      connectionStatus: data['connection_status'],
-      sportPreferences: List<Map<String, dynamic>>.from(data['sport_preferences']),
+      id: int.parse(data['id'].toString()),
+      username: data['username'] ?? "",
+      fullName: data['full_name'] ?? "",
+      city: data['city'] ?? "",
+      bio: data['bio'] ?? "",
+      profilePictureUrl: data['profile_picture_url'] ?? "",
+      connectionStatus: data['connection_status'] ?? "",
+      sportPreferences: List<Map<String, dynamic>>.from(data['sport_preferences'] ?? []),
     );
   }
 }

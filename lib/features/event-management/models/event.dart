@@ -66,7 +66,7 @@ class Event {
 
   /// Membuat objek [Event] dari sebuah Map JSON.
   factory Event.fromJson(Map<String, dynamic> json) => Event(
-        id: json['id'],
+        id: int.parse(json['id'].toString()),
         title: json['title'] ?? '',
         description: json['description'] ?? '',
         thumbnail: json['thumbnail'] ?? '',

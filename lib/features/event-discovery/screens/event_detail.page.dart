@@ -33,11 +33,15 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
   // Fetch fresh data from backend (Refresh Logic)
   Future<void> _refreshEventData() async {
+    print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
+
     // Fetch updated event details using ID
     final updatedEvent = await _service.fetchEventById(_event.id);
+    print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
 
     // Fetch updated status
     final updatedStatus = await _service.getParticipantStatus(int.parse(_event.id));
+    print('DEBUG: Updated status from service: $updatedStatus');
 
     if (mounted) {
       setState(() {
@@ -47,6 +51,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
           _currentParticipants = updatedEvent.currentParticipants;
         }
         _status = updatedStatus;
+        print('DEBUG: State updated - _status is now: $_status');
       });
     }
   }
@@ -65,21 +70,35 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
   Future<void> _handleJoin() async {
     setState(() => _isActionLoading = true);
+    
+    // Panggil service
     final success = await _service.joinEvent(int.parse(widget.event.id));
 
     if (mounted) {
       setState(() => _isActionLoading = false);
+      
       if (success) {
         ToastUtils.showSuccess(context, "Successfully joined the event!");
+        
+        // Jangan tunggu _refreshEventData. Ubah UI langsung karena kita tahu request sukses.
         setState(() {
-          _refreshEventData();
+          _status = 'joined'; 
+          // Opsional: Tambah jumlah partisipan secara visual agar instan
+          if (_currentParticipants < _event.maxParticipants) {
+             _currentParticipants += 1;
+          }
         });
+
+        // Tetap lakukan refresh di background untuk sinkronisasi data yang akurat
+        // Hapus delay jika tidak diperlukan, tapi delay kecil oke untuk memberi waktu server commit DB
+        await Future.delayed(const Duration(milliseconds: 300));
+        await _refreshEventData(); 
+        
       } else {
         ToastUtils.showError(context, "Failed to join event.");
       }
     }
   }
-
   Future<void> _handleLeave() async {
     setState(() => _isActionLoading = true);
     final success = await _service.leaveEvent(int.parse(widget.event.id));
@@ -88,9 +107,18 @@ class _EventDetailScreen extends State<EventDetailScreen>{
       setState(() => _isActionLoading = false);
       if (success) {
         ToastUtils.showSuccess(context, "You have left the event.");
+        
+        // --- PERUBAHAN DI SINI (Optimistic Update) ---
         setState(() {
-          _refreshEventData();
+          _status = 'not_participating'; // Kembalikan ke status awal
+           // Opsional: Kurangi jumlah partisipan secara visual
+          if (_currentParticipants > 0) {
+             _currentParticipants -= 1;
+          }
         });
+
+        await Future.delayed(const Duration(milliseconds: 300));
+        await _refreshEventData();
       } else {
         ToastUtils.showError(context, "Failed to leave event.");
       }
@@ -251,22 +279,70 @@ class _EventDetailScreen extends State<EventDetailScreen>{
   }
 
   Widget _buildActionButton(bool isFull) {
-    if (_status == 'joined') {
-      // Leave Button
-      return ElevatedButton(
-        onPressed: _isActionLoading ? null : _handleLeave,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red[50],
-          foregroundColor: Colors.red,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: _isActionLoading
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Text("Leave Event", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-      );
+    // Check if event has ended (completed or cancelled)
+    final bool eventEnded = _event.status.toLowerCase() == 'completed' ||
+                            _event.status.toLowerCase() == 'cancelled';
+
+    // If user has joined the event (or attended, or cancelled their participation)
+    if (_status == 'joined' || _status == 'attended' || _status == 'cancelled') {
+      // If user cancelled their participation, show appropriate message
+      if (_status == 'cancelled') {
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text("Cancelled", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      }
+
+      // If event has not ended, show Leave button
+      if (!eventEnded) {
+        return ElevatedButton(
+          onPressed: _isActionLoading ? null : _handleLeave,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red[50],
+            foregroundColor: Colors.red,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: _isActionLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text("Leave Event", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      } else {
+        // Event has ended, show status
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: Text(
+            _status == 'attended' ? "Attended" : "Event Ended",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+          ),
+        );
+      }
     } else {
-      // Join Button
+      // User has not joined
+      // If event has ended, show disabled button
+      if (eventEnded) {
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text("Event Ended", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      }
+
+      // Event is still active
       if (isFull) {
         // Full State
         return ElevatedButton(

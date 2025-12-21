@@ -13,9 +13,9 @@ class ActivityBreakdownModel {
   /// Create ActivityBreakdownModel from JSON
   factory ActivityBreakdownModel.fromJson(Map<String, dynamic> json) {
     return ActivityBreakdownModel(
-      label: json['label'] as String,
-      total: json['total'] as int,
-      count: json['count'] as int,
+      label: json['label']?.toString() ?? '',
+      total: int.parse(json['total'].toString()),
+      count: int.parse(json['count'].toString()),
     );
   }
 
