@@ -10,6 +10,10 @@ BondUp adalah aplikasi mobile berbasis Flutter yang menghubungkan para penggemar
 
 ---
 
+**Download Latest Build:** [Bitrise Installable Artifacts](https://app.bitrise.io/app/2b0c0ac9-dc3f-4d35-bbbb-414df6ee39b2/installable-artifacts/8738a9f35294ad64/public-install-page/3aa774caf56fd01a0f5f49a8863cdba3)
+
+---
+
 ## Anggota Kelompok
 
 | Nama | NPM | Modul |
