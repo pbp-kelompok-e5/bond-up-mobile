@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:bond_up_mobile/core/constants/app_constants.dart';
 import 'package:bond_up_mobile/features/profile/data/models/sport_preference_model.dart';
 
-/// Dialog for adding a new sport preference
 class AddSportPreferenceDialog extends StatefulWidget {
   final List<SportPreferenceModel> existingPreferences;
 
@@ -21,11 +21,9 @@ class _AddSportPreferenceDialogState extends State<AddSportPreferenceDialog> {
   String? _selectedSport;
   String? _selectedSkill;
 
-  /// Get list of available sports (excluding already added ones)
   List<MapEntry<String, String>> get _availableSports {
-    final existingSportTypes = widget.existingPreferences
-        .map((pref) => pref.sportType)
-        .toSet();
+    final existingSportTypes =
+        widget.existingPreferences.map((pref) => pref.sportType).toSet();
 
     return AppConstants.sortedSports
         .where((entry) => !existingSportTypes.contains(entry.key))
@@ -38,119 +36,186 @@ class _AddSportPreferenceDialogState extends State<AddSportPreferenceDialog> {
 
     return AlertDialog(
       backgroundColor: AppColors.deepSeaLight,
-      title: const Text(
-        'Add Sport Preference',
-        style: TextStyle(color: Colors.white),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Row(
+        children: [
+          Icon(Icons.library_add_rounded, color: AppColors.orangeSport),
+          SizedBox(width: 12),
+          Text(
+            'Add Sport',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Show message if no sports available
           if (availableSports.isEmpty) ...[
-            const Text(
-              'You have already added all available sports!',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.emoji_events_rounded,
+                      size: 48, color: Colors.white24),
+                  SizedBox(height: 12),
+                  Text(
+                    'You have mastered everything!',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'No more sports available to add.',
+                    style: TextStyle(fontSize: 14, color: Colors.white54),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ] else ...[
+            // --- DROPDOWN SPORT ---
             const Text(
-              'Sport',
+              'Sport Type',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppColors.orangeSport,
               ),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _selectedSport,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.deepSea,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              dropdownColor: AppColors.deepSea,
-              style: const TextStyle(color: Colors.white),
+              dropdownColor:
+                  AppColors.deepSea, // Warna background menu saat dibuka
+
+              // 1. Style untuk Teks Item yang SEDANG DIPILIH
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+
+              // 2. Style untuk HINT (Placeholder) - INI YANG MEMBUATNYA PUTIH
               hint: const Text(
                 'Select a sport',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(color: Colors.white70),
               ),
+
+              icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.orangeSport),
+
+              decoration: InputDecoration(
+                filled: false,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                prefixIcon: const Icon(Icons.directions_run_rounded,
+                    color: AppColors.orangeSport),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                      color: AppColors.orangeSport, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                      color: AppColors.orangeSportHover, width: 2.0),
+                ),
+              ),
+
               items: availableSports.map((entry) {
                 return DropdownMenuItem<String>(
                   value: entry.key,
-                  child: Text(entry.value),
+                  // 3. Style untuk Teks DI DALAM MENU list
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 );
               }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedSport = value;
-                });
-              },
+
+              onChanged: (value) => setState(() => _selectedSport = value),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 20),
+
+            // --- DROPDOWN SKILL ---
             const Text(
               'Skill Level',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppColors.orangeSport,
               ),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _selectedSkill,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.deepSea,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
               dropdownColor: AppColors.deepSea,
-              style: const TextStyle(color: Colors.white),
+
+              // 1. Style Item Terpilih
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+
+              // 2. Style Hint
               hint: const Text(
                 'Select skill level',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(color: Colors.white70),
               ),
+
+              icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.orangeSport),
+
+              decoration: InputDecoration(
+                filled: false,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                prefixIcon: const Icon(Icons.star_outline_rounded,
+                    color: AppColors.orangeSport),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                      color: AppColors.orangeSport, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                      color: AppColors.orangeSportHover, width: 2.0),
+                ),
+              ),
+
               items: AppConstants.sortedSkills.map((entry) {
                 return DropdownMenuItem<String>(
                   value: entry.key,
-                  child: Text(entry.value),
+                  // 3. Style Item Menu
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 );
               }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedSkill = value;
-                });
-              },
+
+              onChanged: (value) => setState(() => _selectedSkill = value),
             ),
           ],
         ],
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text(
-            availableSports.isEmpty ? 'Close' : 'Cancel',
-            style: const TextStyle(color: Colors.white54),
+          onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white54,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
+          child: Text(availableSports.isEmpty ? 'Close' : 'Cancel'),
         ),
         if (availableSports.isNotEmpty)
           ElevatedButton(
@@ -165,11 +230,16 @@ class _AddSportPreferenceDialogState extends State<AddSportPreferenceDialog> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orangeSport,
               foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.orangeSport.withValues(alpha: 0.3),
+              disabledForegroundColor: Colors.white38,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('Add'),
+            child: const Text('Add Sport',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
       ],
     );
   }
 }
-
