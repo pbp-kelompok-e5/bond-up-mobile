@@ -285,14 +285,29 @@ class AppDrawer extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2F3F),
+        backgroundColor: const Color(0xFF1E2F3F), // Background gelap
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Logout', style: TextStyle(color: Colors.white)),
-        content: const Text('Apakah kamu yakin ingin mengakhiri sesi ini?', style: TextStyle(color: Colors.white70)),
+        content: const Text(
+          'Apakah kamu yakin ingin mengakhiri sesi ini?', 
+          style: TextStyle(color: Colors.white70)
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Batal')),
+          // Mengubah warna teks menjadi putih/terang agar terlihat di background gelap
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(
+              'Batal', 
+              style: TextStyle(color: Colors.white), // Ubah warna di sini
+            ),
+          ),
+          
+          // Menambahkan foregroundColor agar teks di dalam tombol merah pasti berwarna putih
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white, // Pastikan teks berwarna putih
+            ),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Ya, Logout'),
           ),
@@ -310,7 +325,6 @@ class AppDrawer extends StatelessWidget {
       }
     }
   }
-
   /// Widget kecil untuk placeholder loading (efek skeleton).
   Widget _buildSkeleton(double width, double height) {
     return Container(
