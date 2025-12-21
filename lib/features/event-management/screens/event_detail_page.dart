@@ -1,340 +1,403 @@
-import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import '../models/event.dart';
-import 'participants_page.dart';
-import 'event_form_page.dart';
-import '../services/event_service.dart';
+import 'package:provider/provider.dart';
+import 'package:bond_up_mobile/features/event-management/models/event.dart';
+import 'package:bond_up_mobile/features/event-management/services/event_service.dart';
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
 
-/// Layar yang menampilkan informasi detail dari satu acara tertentu.
-///
-/// Memungkinkan penyelenggara untuk mengubah, membatalkan, atau menghapus acara.
-/// Juga menyediakan navigasi ke halaman manajemen peserta.
-class EventDetailPage extends StatefulWidget {
-  /// Objek acara yang akan ditampilkan.
+class EventDetailPage extends StatefulWidget{
   final Event event;
-
-  /// Membuat [EventDetailPage] dengan [event] yang diberikan.
   const EventDetailPage({super.key, required this.event});
 
   @override
   State<EventDetailPage> createState() => _EventDetailPageState();
 }
 
-class _EventDetailPageState extends State<EventDetailPage> {
-  /// Data acara yang ditampilkan pada halaman ini.
-  late Event event;
-
-  /// Layanan (service) untuk panggilan API terkait acara.
-  late EventService service;
+class _EventDetailPageState extends State<EventDetailPage>{
+  late EventService _service;
+  bool _isLoading = true;
+  bool _isActionLoading = false;
+  String _status = 'not_participating';
+  late int _currentParticipants;
+  late Event _event;
 
   @override
   void initState() {
     super.initState();
-    event = widget.event;
+    final request = context.read<CookieRequest>();
+    _service = EventService(request);
+    _event = widget.event;
+    _currentParticipants = _event.currentParticipants;
+    _fetchStatus();
+  }
+
+  // Fetch fresh data from backend (Refresh Logic)
+  Future<void> _refreshEventData() async {
+    // print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
+
+    // Fetch updated event details using ID
+    final updatedEvent = await _service.fetchEventDetail(_event.id);
+    // print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
+
+    // Fetch updated status - Assuming event_service has fetchParticipantStatus
+    final updatedStatus = await _service.fetchParticipantStatus(_event.id);
+    // print('DEBUG: Updated status from service: $updatedStatus');
+
+    if (mounted) {
+      setState(() {
+        _event = updatedEvent;
+        // Update local participants count to match server
+        _currentParticipants = updatedEvent.currentParticipants;
+        _status = updatedStatus;
+        // print('DEBUG: State updated - _status is now: $_status');
+      });
+    }
+  }
+
+
+  Future<void> _fetchStatus() async {
+    // Fetch user status ('joined', 'not_participating', etc.) - Assuming event_service has fetchParticipantStatus
+    final status = await _service.fetchParticipantStatus(widget.event.id);
+    if (mounted) {
+      setState(() {
+        _status = status;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleJoin() async {
+    setState(() => _isActionLoading = true);
+    
+    // Panggil service
+    final res = await _service.joinEvent(widget.event.id);
+
+    if (mounted) {
+      setState(() => _isActionLoading = false);
+      
+      if (res["status"] == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res["message"])),
+        );
+        
+        // Jangan tunggu _refreshEventData. Ubah UI langsung karena kita tahu request sukses.
+        setState(() {
+          _status = 'joined'; 
+          // Opsional: Tambah jumlah partisipan secara visual agar instan
+          if (_currentParticipants < _event.maxParticipants) {
+             _currentParticipants += 1;
+          }
+        });
+
+        // Tetap lakukan refresh di background untuk sinkronisasi data yang akurat
+        // Hapus delay jika tidak diperlukan, tapi delay kecil oke untuk memberi waktu server commit DB
+        await Future.delayed(const Duration(milliseconds: 300));
+        await _refreshEventData(); 
+        
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res["message"])),
+        );
+      }
+    }
+  }
+  Future<void> _handleLeave() async {
+    setState(() => _isActionLoading = true);
+    final res = await _service.leaveEvent(widget.event.id);
+
+    if (mounted) {
+      setState(() => _isActionLoading = false);
+      if (res["status"] == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res["message"])),
+        );
+        
+        // --- PERUBAHAN DI SINI (Optimistic Update) ---
+        setState(() {
+          _status = 'not_participating'; // Kembalikan ke status awal
+           // Opsional: Kurangi jumlah partisipan secara visual
+          if (_currentParticipants > 0) {
+             _currentParticipants -= 1;
+          }
+        });
+
+        await Future.delayed(const Duration(milliseconds: 300));
+        await _refreshEventData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res["message"])),
+        );
+      }
+    }
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Menginisialisasi EventService menggunakan CookieRequest dari context.
-    final request = context.watch<CookieRequest>();
-    service = EventService(request);
-  }
-
-  /// Memperbarui data acara dengan mengambil detail terbaru dari API.
-  void _refreshEvent() async {
-    final updatedEvent = await service.fetchEventDetail(event.id);
-    setState(() {
-      event = updatedEvent;
-    });
-  }
-
-  @override
-  Widget build(context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context) {
+    // Calculate if event is full based on local state
+    final bool isFull = _currentParticipants >= _event.maxParticipants;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 250.0,
-            pinned: true,
-            floating: false,
-            backgroundColor: AppColors.deepSea,
-            iconTheme: const IconThemeData(color: Colors.white),
-            // Membangun tombol aksi untuk app bar berdasarkan status acara.
-            actions: _buildAppBarActions(),
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(
-                event.title,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              background: Hero(
-                tag: 'event-thumbnail-${event.id}',
-                child: Image.network(
-                  event.thumbnail,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey,
-                    child: const Icon(Icons.broken_image, size: 50, color: Colors.white),
-                  ),
+      backgroundColor: AppColors.gray50,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        title: const Text("Event Detail"),
+      ),
+      body: Column(
+        children: [
+          // Scrollable Content wrapped in RefreshIndicator
+          Expanded(
+            child: RefreshIndicator(
+              // Triggered when user swipes down
+              onRefresh: _refreshEventData,
+              child: SingleChildScrollView(
+                // Ensure scroll view is always scrollable so refresh works even if content is short
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event Thumbnail (Using _event instead of widget.event)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: _event.thumbnail.isNotEmpty
+                          ? Image.network(
+                        _event.thumbnail,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, error, stack) => Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                        ),
+                      )
+                          : Container(
+                        color: Colors.blueAccent.withValues(alpha: 0.2),
+                        child: const Icon(Icons.event, size: 60, color: Colors.blueAccent),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            _event.title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Organizer
+                          Row(
+                            children: [
+                              const Icon(Icons.person, size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Organized by ${_event.organizerUsername}",
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Tags (City, Sport)
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              Chip(
+                                label: Text(_event.city),
+                                avatar: const Icon(Icons.location_city, size: 16),
+                                backgroundColor: Colors.blue[50],
+                              ),
+                              Chip(
+                                label: Text(_event.sportType),
+                                avatar: const Icon(Icons.sports, size: 16),
+                                backgroundColor: Colors.orange[50],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Info Grid
+                          _buildInfoRow(Icons.calendar_today, "Date", _event.eventDate.toString().split(' ')[0]),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(Icons.access_time, "Time", "${_event.startTime} - ${_event.endTime}"),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(Icons.place, "Location", _event.locationName),
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                            Icons.group,
+                            "Participants",
+                            "$_currentParticipants / ${_event.maxParticipants}",
+                            highlight: isFull && _status != 'joined',
+                          ),
+
+                          const Divider(height: 40),
+
+                          // Description
+                          const Text(
+                            "About Event",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _event.description,
+                            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 80), // Space for bottom bar
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        event.description,
-                        style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.gray700, height: 1.5),
-                      ),
-                      const SizedBox(height: 24),
-                      const Divider(),
-                      // Membangun baris untuk menampilkan detail acara (ikon, label, nilai).
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.sports_soccer,
-                        label: "Sport",
-                        value: event.sportType,
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.location_city,
-                        label: "City",
-                        value: event.city,
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.place,
-                        label: "Location",
-                        value: event.locationName,
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.calendar_today,
-                        label: "Date",
-                        value: DateFormat('d MMMM yyyy').format(event.eventDate),
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.access_time,
-                        label: "Time",
-                        value: '${event.startTime} - ${event.endTime}',
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.group,
-                        label: "Participants",
-                        value: '${event.currentParticipants}/${event.maxParticipants}',
-                      ),
-                      _buildDetailRow(
-                        theme,
-                        icon: Icons.info_outline,
-                        label: "Status",
-                        value: event.status.toUpperCase(),
-                        isStatus: true, // Styling khusus untuk kolom status
-                      ),
-                      const SizedBox(height: 30),
-                    ],
-                  ),
+
+          // Fixed Bottom Button Area
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
                 ),
               ],
             ),
+            child: SafeArea(
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _buildActionButton(isFull),
+              ),
+            ),
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton.icon(
-          icon: const Icon(Icons.people_alt_outlined),
-          label: const Text("Manage Participants"),
+    );
+  }
+
+  Widget _buildActionButton(bool isFull) {
+    // Check if event has ended (completed or cancelled)
+    final bool eventEnded = _event.status.toLowerCase() == 'completed' ||
+                            _event.status.toLowerCase() == 'cancelled';
+
+    // If user has joined the event (or attended, or cancelled their participation)
+    if (_status == 'joined' || _status == 'attended' || _status == 'cancelled') {
+      // If user cancelled their participation, show appropriate message
+      if (_status == 'cancelled') {
+        return ElevatedButton(
+          onPressed: null, // Disabled
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.orangeSport,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle: theme.textTheme.labelLarge,
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ParticipantsPage(eventId: event.id),
-            ),
+          child: const Text("Cancelled", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      }
+
+      // If event has not ended, show Leave button
+      if (!eventEnded) {
+        return ElevatedButton(
+          onPressed: _isActionLoading ? null : _handleLeave,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red[50],
+            foregroundColor: Colors.red,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-        ),
-      ),
-    );
-  }
+          child: _isActionLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text("Leave Event", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      } else {
+        // Event has ended, show status
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: Text(
+            _status == 'attended' ? "Attended" : "Event Ended",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+          ),
+        );
+      }
+    } else {
+      // User has not joined
+      // If event has ended, show disabled button
+      if (eventEnded) {
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.grey[700],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text("Event Ended", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      }
 
-  /// Membangun tombol aksi yang ditampilkan di app bar (edit, cancel, delete).
-  ///
-  /// Aksi bersifat kondisional berdasarkan status acara.
-  List<Widget> _buildAppBarActions() {
-    return [
-      // Tombol edit hanya ditampilkan untuk acara yang akan datang (upcoming).
-      if (event.status == "upcoming")
-        IconButton(
-          icon: const Icon(Icons.edit),
-          tooltip: "Edit Event",
-          onPressed: () async {
-            // Navigasi ke EventFormPage untuk pengubahan dan refresh jika berhasil.
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => EventFormPage(event: event)),
-            );
-            if (result == true && mounted) {
-              _refreshEvent();
-              // Kembali ke MyEventsPage dengan flag pembaruan.
-              Navigator.pop(context, true);
-            }
-          },
-        ),
-      // Tombol cancel hanya ditampilkan untuk acara yang akan datang (upcoming).
-      if (event.status == "upcoming")
-        IconButton(
-          icon: const Icon(Icons.cancel),
-          tooltip: "Cancel Event",
-          onPressed: () async {
-            // Tampilkan dialog konfirmasi sebelum membatalkan.
-            final confirm = await _showConfirmationDialog(
-              title: "Confirm Cancellation",
-              content: "Are you sure you want to cancel this event?",
-              confirmText: "Yes, Cancel",
-            );
-
-            if (confirm) {
-              final res = await service.cancelEvent(event.id);
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res["message"])));
-              // Kembali ke MyEventsPage dengan flag pembaruan.
-              Navigator.pop(context, true);
-            }
-          },
-        ),
-      // Tombol delete selalu ditampilkan.
-      IconButton(
-        icon: const Icon(Icons.delete),
-        tooltip: "Delete Event",
-        onPressed: () async {
-          // Tampilkan dialog konfirmasi sebelum menghapus.
-          final confirm = await _showConfirmationDialog(
-            title: "Confirm Deletion",
-            content: "Are you sure you want to permanently delete this event?",
-            confirmText: "Delete",
-          );
-
-          if (confirm) {
-            final res = await service.deleteEvent(event.id);
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res["message"])));
-            // Kembali ke MyEventsPage dengan flag pembaruan.
-            Navigator.pop(context, true);
-          }
-        },
-      ),
-    ];
-  }
-
-  /// Membangun baris untuk menampilkan satu detail acara.
-  ///
-  /// Mencakup [icon], [label], dan [value].
-  /// Jika [isStatus] bernilai true, warna teks nilai akan berubah berdasarkan statusnya.
-  Widget _buildDetailRow(ThemeData theme,
-      {required IconData icon, required String label, required String value, bool isStatus = false}) {
-    Color statusColor;
-    switch (value.toLowerCase()) {
-      case 'upcoming':
-        statusColor = AppColors.statusActive;
-        break;
-      case 'open':
-        statusColor = AppColors.statusActive;
-        break;
-      case 'cancelled':
-        statusColor = AppColors.statusCancelled;
-        break;
-      case 'completed':
-        statusColor = AppColors.statusCompleted;
-        break;
-      default:
-        statusColor = AppColors.gray700;
+      // Event is still active
+      if (isFull) {
+        // Full State
+        return ElevatedButton(
+          onPressed: null, // Disabled
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text("Event Full", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      } else {
+        // Active Join State
+        return ElevatedButton(
+          onPressed: _isActionLoading ? null : _handleJoin,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor, // Use your app's primary color
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: _isActionLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Text("Join Event", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        );
+      }
     }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppColors.orangeSport, size: 20),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                text: '$label: ',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: AppColors.gray800,
-                  fontWeight: FontWeight.bold,
-                ),
-                children: [
-                  TextSpan(
-                    text: value,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isStatus ? statusColor : AppColors.gray700,
-                      fontWeight: isStatus ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
-  /// Menampilkan dialog konfirmasi kepada pengguna.
-  ///
-  /// Menerima [title], [content], serta opsional [confirmText] dan flag [isDestructive].
-  /// Mengembalikan `true` jika pengguna mengonfirmasi, dan `false` jika tidak.
-  Future<bool> _showConfirmationDialog({
-    required String title,
-    required String content,
-    String confirmText = "Confirm",
-    bool isDestructive = true,
-  }) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: AppColors.deepSeaLight,
-            title: Text(title, style: const TextStyle(color: AppColors.white)),
-            content: Text(content, style: const TextStyle(color: AppColors.gray300)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text("No", style: TextStyle(color: AppColors.gray300)),
+  Widget _buildInfoRow(IconData icon, String label, String value, {bool highlight = false}) {
+    return Row(
+      children: [
+        Icon(icon, color: highlight ? Colors.red : Colors.grey[600], size: 20),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: highlight ? Colors.red : Colors.black,
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(
-                  backgroundColor: isDestructive ? AppColors.buttonDanger : AppColors.orangeSport,
-                  foregroundColor: AppColors.white,
-                ),
-                child: Text(confirmText),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
