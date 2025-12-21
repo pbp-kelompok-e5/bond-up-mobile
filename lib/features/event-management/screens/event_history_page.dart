@@ -1,20 +1,21 @@
-import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
+
+// Pastikan import ini sesuai dengan project Anda
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import '../services/event_history_service.dart';
 import '../models/event_with_status.dart';
 import '../models/event.dart';
 import 'event_detail_page.dart';
 import '../../reviews/presentation/screens/event_reviews_screen.dart';
 
-/// Layar yang menampilkan riwayat acara yang diikuti oleh pengguna saat ini.
+/// Halaman Riwayat Acara (Event History).
 /// 
-/// Menampilkan daftar acara di mana pengguna terdaftar sebagai peserta,
-/// dengan tombol aksi yang berbeda berdasarkan status partisipasi.
+/// Menampilkan daftar acara yang pernah diikuti pengguna.
+/// Menggunakan kombinasi warna Background Abu-abu Gelap dan Kartu Biru Gelap (Deep Sea).
 class EventHistoryPage extends StatefulWidget {
-  /// Membuat [EventHistoryPage].
   const EventHistoryPage({super.key});
   
   @override
@@ -22,195 +23,253 @@ class EventHistoryPage extends StatefulWidget {
 }
 
 class _EventHistoryPageState extends State<EventHistoryPage> {
-  /// Layanan untuk mengambil riwayat acara.
   late EventHistoryService service;
-  
-  /// List acara dengan status partisipasi.
   List<EventWithStatus> eventsWithStatus = [];
-  
-  /// Flag untuk menandakan proses loading.
   bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Inisialisasi akan dilakukan di didChangeDependencies
-  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Menginisialisasi EventHistoryService menggunakan CookieRequest dari context.
     final request = context.watch<CookieRequest>();
     service = EventHistoryService(request);
     
-    // Hanya fetch sekali saat pertama kali
+    // Muat data hanya jika list kosong dan masih loading
     if (isLoading && eventsWithStatus.isEmpty) {
       _fetchEventHistory();
     }
   }
 
-  /// Mengambil riwayat acara dari API.
+  /// Mengambil data dari API
   Future<void> _fetchEventHistory() async {
     setState(() => isLoading = true);
-    
-    final events = await service.fetchEventHistory();
-    
-    if (mounted) {
-      setState(() {
-        eventsWithStatus = events;
-        isLoading = false;
-      });
+    try {
+      final events = await service.fetchEventHistory();
+      if (mounted) {
+        setState(() {
+          eventsWithStatus = events;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Scaffold(
+      // 1. Background Halaman: Dark Gray (Sesuai permintaan)
+      backgroundColor: AppColors.darkGrayBackground, 
+      
       appBar: AppBar(
-        title: const Text('Event History'),
+        title: const Text(
+          'Event History',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        // AppBar menyatu dengan background halaman
+        backgroundColor: AppColors.darkGrayBackground, 
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         actions: [
-          // Tombol penyegar (refresh) di app bar.
           IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: "Refresh",
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: "Refresh Data",
             onPressed: _fetchEventHistory,
           ),
         ],
       ),
+      
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.orangeSport),
+            )
           : eventsWithStatus.isEmpty
               ? _buildEmptyState()
               : RefreshIndicator(
+                  color: AppColors.orangeSport,
+                  backgroundColor: AppColors.deepSea,
                   onRefresh: _fetchEventHistory,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(20),
                     itemCount: eventsWithStatus.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 20),
                     itemBuilder: (context, index) {
-                      final eventWithStatus = eventsWithStatus[index];
-                      return _buildEventCard(eventWithStatus, theme);
+                      return _buildEventCard(eventsWithStatus[index]);
                     },
                   ),
                 ),
     );
   }
 
-  /// Membangun widget untuk keadaan kosong (tidak ada acara).
+  /// Tampilan Kosong (Empty State)
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 80,
-            color: AppColors.gray400,
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              // Background icon menggunakan Deep Sea agar kontras dengan Dark Gray
+              color: AppColors.deepSea, 
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.history_toggle_off_rounded,
+              size: 64,
+              color: AppColors.orangeSport,
+            ),
           ),
-          const SizedBox(height: 16),
-          Text(
+          const SizedBox(height: 24),
+          const Text(
             "No Event History",
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.gray600,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            "You haven't joined any events yet",
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.gray500,
-            ),
+          const Text(
+            "You haven't joined any events yet.",
+            style: TextStyle(fontSize: 16, color: Colors.white70),
           ),
         ],
       ),
     );
   }
 
-  /// Membangun kartu untuk menampilkan informasi acara.
-  Widget _buildEventCard(EventWithStatus eventWithStatus, ThemeData theme) {
+  /// Membangun Kartu Event
+  Widget _buildEventCard(EventWithStatus eventWithStatus) {
     final event = eventWithStatus.event;
     final status = eventWithStatus.participantStatus;
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+
+    return Container(
+      decoration: BoxDecoration(
+        // 2. Warna Kartu: Deep Sea (Biru Gelap)
+        color: AppColors.deepSea, 
+        borderRadius: BorderRadius.circular(16),
+        // Bayangan untuk memisahkan kartu dari background abu-abu
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Event thumbnail
-          if (event.thumbnail.isNotEmpty)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.network(
-                event.thumbnail,
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 150,
-                  color: AppColors.gray300,
-                  child: const Icon(Icons.broken_image, size: 50),
+          // --- GAMBAR & BADGE STATUS ---
+          Stack(
+            children: [
+              // Gambar Event
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: SizedBox(
+                  height: 160,
+                  width: double.infinity,
+                  child: event.thumbnail.isNotEmpty
+                      ? Image.network(
+                          event.thumbnail,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.white10,
+                            child: const Icon(Icons.image_not_supported, color: Colors.white24, size: 40),
+                          ),
+                        )
+                      : Container(
+                          // Placeholder jika gambar kosong
+                          color: AppColors.orangeSport.withValues(alpha: 0.1),
+                          child: const Icon(Icons.sports_soccer, color: AppColors.orangeSport, size: 40),
+                        ),
                 ),
               ),
-            ),
+              
+              // Gradient Overlay (Supaya teks status terbaca jelas)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.7),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.4],
+                    ),
+                  ),
+                ),
+              ),
 
-          // Event details
+              // Status Badge (Melayang di kanan atas)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: _buildStatusBadge(status),
+              ),
+            ],
+          ),
+
+          // --- KONTEN INFORMASI ---
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title and status chip
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        event.title,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildStatusChip(status),
-                  ],
+                // Judul Event
+                Text(
+                  event.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Teks putih di atas kartu biru gelap
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 12),
 
-                // Date
+                // Tanggal
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 16, color: AppColors.gray600),
+                    const Icon(Icons.calendar_month_rounded, size: 16, color: AppColors.orangeSport),
                     const SizedBox(width: 8),
                     Text(
-                      DateFormat('d MMMM yyyy').format(event.eventDate),
-                      style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.gray700),
+                      DateFormat('EEE, d MMMM yyyy').format(event.eventDate),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
-                // Location
+                // Lokasi
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 16, color: AppColors.gray600),
+                    const Icon(Icons.location_on_rounded, size: 16, color: AppColors.orangeSport),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '${event.locationName}, ${event.city}',
-                        style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.gray700),
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
+                
+                const SizedBox(height: 20),
+                
+                // Garis pemisah tipis
+                Divider(height: 1, color: Colors.white.withValues(alpha: 0.1)),
                 const SizedBox(height: 16),
 
-                // Action button
+                // Tombol Aksi
                 SizedBox(
                   width: double.infinity,
                   child: _buildActionButton(event, status),
@@ -223,54 +282,79 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
     );
   }
 
-  /// Membangun chip status partisipasi.
-  Widget _buildStatusChip(String status) {
-    Color chipColor;
-    String label;
+  /// Widget Badge Status (Pill Shape)
+  Widget _buildStatusBadge(String status) {
+    Color bgColor;
+    Color textColor = Colors.white;
+    IconData icon;
 
     switch (status.toLowerCase()) {
       case 'attended':
-        chipColor = AppColors.statusCompletedBackground;
-        label = 'ATTENDED';
+        bgColor = AppColors.statusCompleted; // Hijau/Biru
+        icon = Icons.check_circle_rounded;
         break;
       case 'joined':
-        chipColor = AppColors.statusActiveBackground;
-        label = 'JOINED';
+        bgColor = AppColors.statusActive; // Hijau
+        icon = Icons.confirmation_number_rounded;
         break;
       case 'cancelled':
-        chipColor = AppColors.gray300;
-        label = 'CANCELLED';
+        bgColor = AppColors.buttonDanger; // Merah
+        icon = Icons.cancel_rounded;
         break;
       default:
-        chipColor = AppColors.gray200;
-        label = status.toUpperCase();
+        bgColor = Colors.grey;
+        icon = Icons.info_rounded;
     }
 
-    return Chip(
-      label: Text(label),
-      labelStyle: const TextStyle(
-        color: AppColors.deepSea,
-        fontWeight: FontWeight.bold,
-        fontSize: 10,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      backgroundColor: chipColor,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      visualDensity: VisualDensity.compact,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            status.toUpperCase(),
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Membangun tombol aksi berdasarkan status partisipasi.
+  /// Widget Tombol Aksi (Dinamis berdasarkan status)
   Widget _buildActionButton(Event event, String status) {
+    // Style dasar tombol
+    final btnStyle = ElevatedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+    );
+
     switch (status.toLowerCase()) {
       case 'attended':
-        // Navigate to event reviews screen
         return ElevatedButton.icon(
-          icon: const Icon(Icons.rate_review),
-          label: const Text("Write Reviews"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.orangeSport,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+          icon: const Icon(Icons.rate_review_rounded, size: 18),
+          label: const Text("Write Review"),
+          style: btnStyle.copyWith(
+            backgroundColor: WidgetStateProperty.all(AppColors.orangeSport),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
           ),
           onPressed: () {
             Navigator.push(
@@ -286,14 +370,14 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
         );
 
       case 'joined':
-        // Navigate to event detail page
+        // Tombol View Details dengan style transparan/outline
         return ElevatedButton.icon(
-          icon: const Icon(Icons.info_outline),
+          icon: const Icon(Icons.visibility_rounded, size: 18),
           label: const Text("View Details"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.deepSea,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+          style: btnStyle.copyWith(
+            backgroundColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+            side: WidgetStateProperty.all(const BorderSide(color: Colors.white24)),
           ),
           onPressed: () {
             Navigator.push(
@@ -306,38 +390,18 @@ class _EventHistoryPageState extends State<EventHistoryPage> {
         );
 
       case 'cancelled':
-        // Disabled button
         return ElevatedButton.icon(
-          icon: const Icon(Icons.cancel),
+          icon: const Icon(Icons.block_rounded, size: 18),
           label: const Text("Cancelled"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.gray400,
-            foregroundColor: AppColors.gray600,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+          style: btnStyle.copyWith(
+            backgroundColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.05)),
+            foregroundColor: WidgetStateProperty.all(Colors.white38),
           ),
           onPressed: null, // Disabled
         );
 
       default:
-        // Default view details button
-        return ElevatedButton.icon(
-          icon: const Icon(Icons.info_outline),
-          label: const Text("View Details"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.deepSea,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EventDetailPage(event: event),
-              ),
-            );
-          },
-        );
+        return const SizedBox.shrink();
     }
   }
 }
-
