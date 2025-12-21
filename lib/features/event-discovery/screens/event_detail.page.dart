@@ -33,15 +33,15 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
   // Fetch fresh data from backend (Refresh Logic)
   Future<void> _refreshEventData() async {
-    print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
+    // print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
 
     // Fetch updated event details using ID
     final updatedEvent = await _service.fetchEventById(_event.id);
-    print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
+    // print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
 
     // Fetch updated status
     final updatedStatus = await _service.getParticipantStatus(int.parse(_event.id));
-    print('DEBUG: Updated status from service: $updatedStatus');
+    // print('DEBUG: Updated status from service: $updatedStatus');
 
     if (mounted) {
       setState(() {
@@ -51,7 +51,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
           _currentParticipants = updatedEvent.currentParticipants;
         }
         _status = updatedStatus;
-        print('DEBUG: State updated - _status is now: $_status');
+        // print('DEBUG: State updated - _status is now: $_status');
       });
     }
   }
