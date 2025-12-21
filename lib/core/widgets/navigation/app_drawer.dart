@@ -6,7 +6,7 @@ import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:bond_up_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:bond_up_mobile/features/profile/data/services/profile_service.dart';
-import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/event_dicovery_home_page.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
@@ -65,7 +65,7 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MyHomePage(title: 'BondUp Mobile'),
+                          builder: (context) => const EventDiscoveryHomePage(),
                         ),
                         (route) => false,
                       );

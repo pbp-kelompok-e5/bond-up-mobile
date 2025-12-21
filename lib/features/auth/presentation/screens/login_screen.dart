@@ -11,7 +11,7 @@ import 'package:bond_up_mobile/core/utils/toast_utils.dart';
 
 import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/register_screen.dart';
-import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/event_dicovery_home_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ToastUtils.showSuccess(context, 'Welcome back, ${response.username}!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MyHomePage(title: 'BondUp Mobile')),
+          MaterialPageRoute(builder: (context) => const EventDiscoveryHomePage()),
         );
       } else {
         ToastUtils.showError(context, response.message);

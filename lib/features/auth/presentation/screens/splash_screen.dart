@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:bond_up_mobile/features/auth/data/services/auth_service.dart';
 import 'package:bond_up_mobile/features/auth/presentation/screens/login_screen.dart';
-import 'package:bond_up_mobile/features/home/presentation/screens/home_page.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/event_dicovery_home_page.dart';
 
 /// Splash screen that checks authentication status on app startup
 class SplashScreen extends StatefulWidget {
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const MyHomePage(title: 'BondUp Mobile'),
+          builder: (context) => const EventDiscoveryHomePage(),
         ),
       );
     } else {
