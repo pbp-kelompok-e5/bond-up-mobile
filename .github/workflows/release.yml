@@ -1,22 +1,15 @@
-# This is a basic workflow to help you get started with Actions
 name: Release
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push events but only for the main branch
   push:
     branches: [main]
 
-# Permissions needed for creating releases
 permissions:
   contents: write
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "Build and Release APK"
   releases:
     name: Build and Release APK
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
@@ -24,10 +17,7 @@ jobs:
 
       - name: Get version from pubspec.yaml
         id: version
-        run: |
-          VERSION=$(grep "version:" pubspec.yaml | cut -c10-)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION"
+        run: echo "::set-output name=version::$(grep "version:" pubspec.yaml | cut -c10-)"
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -43,67 +33,37 @@ jobs:
       - name: Get packages
         run: flutter pub get
 
-      - name: Decode Keystore
-        run: |
-          echo "${{ secrets.KEY_JKS }}" | base64 -d > android/app/release-keystore.jks
-          echo "Keystore decoded successfully"
-
-      - name: Create key.properties
-        run: |
-          cat > android/key.properties << EOF
-          storePassword=${{ secrets.KEY_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=release
-          storeFile=release-keystore.jks
-          EOF
-          echo "key.properties created"
-
+      # Hapus --split-per-abi agar jadi 1 file Universal yang aman buat semua HP
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release
 
-      - name: Cleanup Keystore
-        if: always()
-        run: |
-          rm -f android/app/release-keystore.jks
-          rm -f android/key.properties
-
-      - name: Decode Keystore
-        run: echo "${{ secrets.KEY_JKS }}" | base64 -d > release-keystore.jks
-
-      - name: Sign APKs
-        run: |
-          for apk in build/app/outputs/flutter-apk/*.apk; do
-            echo "Signing $apk..."
-            jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-              -keystore release-keystore.jks \
-              -storepass "${{ secrets.KEY_PASSWORD }}" \
-              -keypass "${{ secrets.KEY_PASSWORD }}" \
-              "$apk" release
-          done
-
-      - name: Cleanup Keystore
-        if: always()
-        run: rm -f release-keystore.jks
+      # Action ini otomatis handle Decode Keystore, Zipalign, dan V2 Signing
+      - name: Sign APK
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: build/app/outputs/flutter-apk
+          signingKeyBase64: ${{ secrets.KEY_JKS }}
+          alias: release
+          keyStorePassword: ${{ secrets.KEY_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        # Catatan: Pastikan 'alias' di keystore Anda benar bernama 'release'. 
+        # Di script lama Anda tertulis '"$apk" release', jadi saya asumsikan alias-nya adalah 'release'.
 
       - name: Get current date
         id: date
-        run: |
-          DATE=$(TZ='Asia/Jakarta' date +'%A %d-%m-%Y %T WIB')
-          echo "date=$DATE" >> $GITHUB_OUTPUT
-          echo "Current date: $DATE"
+        run: echo "::set-output name=date::$(TZ='Asia/Jakarta' date +'%A %d-%m-%Y %T WIB')"
 
       - name: Generate unique tag
         id: tag
-        run: |
-          TAG="v${{ steps.version.outputs.version }}-$(date +'%Y%m%d%H%M%S')"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Generated tag: $TAG"
+        run: echo "::set-output name=tag::v${{ steps.version.outputs.version }}-$(date +'%Y%m%d%H%M%S')"
 
       - name: Release APK
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: false
-          artifacts: "build/app/outputs/flutter-apk/*.apk"
+          # Ambil output file yang sudah di-sign dari step sebelumnya
+          artifacts: ${{ steps.sign_app.outputs.signedReleaseFile }}
           body: "Published at ${{ steps.date.outputs.date }}"
           name: "v${{ steps.version.outputs.version }} - ${{ steps.date.outputs.date }}"
           token: ${{ secrets.GITHUB_TOKEN }}
