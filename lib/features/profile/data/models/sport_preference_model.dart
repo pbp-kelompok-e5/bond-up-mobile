@@ -19,12 +19,12 @@ class SportPreferenceModel {
   /// Create SportPreferenceModel from JSON
   factory SportPreferenceModel.fromJson(Map<String, dynamic> json) {
     return SportPreferenceModel(
-      id: json['id'] as int,
-      sportType: json['sport_type'] as String,
-      sportTypeDisplay: json['sport_type_display'] as String,
-      skillLevel: json['skill_level'] as String,
-      skillLevelDisplay: json['skill_level_display'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: int.parse(json['id'].toString()),
+      sportType: json['sport_type']?.toString() ?? '',
+      sportTypeDisplay: json['sport_type_display']?.toString() ?? '',
+      skillLevel: json['skill_level']?.toString() ?? '',
+      skillLevelDisplay: json['skill_level_display']?.toString() ?? '',
+      createdAt: DateTime.parse(json['created_at'].toString()),
     );
   }
 

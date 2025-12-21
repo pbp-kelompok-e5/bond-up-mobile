@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:bond_up_mobile/core/design_system.dart'; 
+import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/reviews/data/models/user_written_review.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 class UserWrittenReviewsPage extends StatefulWidget {
   const UserWrittenReviewsPage({super.key});
@@ -12,11 +13,9 @@ class UserWrittenReviewsPage extends StatefulWidget {
 }
 
 class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
-  final String baseUrl = "http://localhost:8000";
-
   // 1. Fetch Data
   Future<List<UserWrittenReview>> fetchMyWrittenReviews(CookieRequest request) async {
-    final response = await request.get('$baseUrl/reviews/api/my-reviews/');
+    final response = await request.get('${ApiConstants.baseUrl}/reviews/api/my-reviews/');
     
     List<UserWrittenReview> listReview = [];
     if (response['status'] == 'success') {
@@ -31,7 +30,7 @@ class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
 
   // 2. Delete Data
   Future<void> deleteMyReview(CookieRequest request, int id) async {
-    final response = await request.post('$baseUrl/reviews/ajax/delete/$id/', {});
+    final response = await request.post('${ApiConstants.baseUrl}/reviews/ajax/delete/$id/', {});
     if (response['ok']) {
       setState(() {}); 
       if (mounted) ToastUtils.showSuccess(context, "Review deleted!");
@@ -41,7 +40,7 @@ class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
   // 3. Update Data (Fitur Edit)
   Future<void> updateMyReview(CookieRequest request, int id, int rating, String comment) async {
     final response = await request.post(
-      '$baseUrl/reviews/ajax/update/$id/',
+      '${ApiConstants.baseUrl}/reviews/ajax/update/$id/',
       {
         'rating': rating.toString(),
         'comment': comment,

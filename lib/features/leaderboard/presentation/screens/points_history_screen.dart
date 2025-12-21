@@ -142,7 +142,7 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.orangeSport.withOpacity(0.2),
+                color: AppColors.orangeSport.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -176,8 +176,8 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
               height: 48,
               decoration: BoxDecoration(
                 color: isPositive
-                    ? AppColors.orangeSport.withOpacity(0.2)
-                    : Colors.red.withOpacity(0.2),
+                    ? AppColors.orangeSport.withValues(alpha: 0.2)
+                    : Colors.red.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(

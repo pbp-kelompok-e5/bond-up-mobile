@@ -25,15 +25,15 @@ class LeaderboardEntryModel {
   /// Create LeaderboardEntryModel from JSON
   factory LeaderboardEntryModel.fromJson(Map<String, dynamic> json) {
     return LeaderboardEntryModel(
-      rank: json['rank'] as int,
-      userId: json['user_id'] as int,
-      username: json['username'] as String,
-      fullName: json['full_name'] as String,
-      profileImageUrl: json['profile_image_url'] as String? ?? '',
-      totalPoints: json['total_points'] as int,
-      totalEvents: json['total_events'] as int,
-      tier: json['tier'] as String,
-      badge: json['badge'] as String,
+      rank: int.parse(json['rank'].toString()),
+      userId: int.parse(json['user_id'].toString()),
+      username: json['username']?.toString() ?? '',
+      fullName: json['full_name']?.toString() ?? '',
+      profileImageUrl: json['profile_image_url']?.toString() ?? '',
+      totalPoints: int.parse(json['total_points'].toString()),
+      totalEvents: int.parse(json['total_events'].toString()),
+      tier: json['tier']?.toString() ?? '',
+      badge: json['badge']?.toString() ?? '',
     );
   }
 
