@@ -47,10 +47,6 @@ jobs:
           alias: release
           keyStorePassword: ${{ secrets.KEY_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-<<<<<<< HEAD
-=======
-          buildToolsVersion: 34.0.0
->>>>>>> 793d2ca6a8f8bbc5d15a6109ff1461ae3c8a6de5
 
       - name: Get current date
         id: date
