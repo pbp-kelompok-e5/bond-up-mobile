@@ -40,14 +40,13 @@ jobs:
       # Action ini otomatis handle Decode Keystore, Zipalign, dan V2 Signing
       - name: Sign APK
         id: sign_app
-        uses: r0adkll/sign-android-release@v1
+        uses: ilharp/sign-android-release@v1
         with:
           releaseDirectory: build/app/outputs/flutter-apk
           signingKeyBase64: ${{ secrets.KEY_JKS }}
           alias: release
           keyStorePassword: ${{ secrets.KEY_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 34.0.0
 
       - name: Get current date
         id: date
