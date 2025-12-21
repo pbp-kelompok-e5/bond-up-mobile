@@ -33,15 +33,15 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
   // Fetch fresh data from backend (Refresh Logic)
   Future<void> _refreshEventData() async {
-    print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
+    // print('DEBUG: _refreshEventData called for event ID: ${_event.id}');
 
     // Fetch updated event details using ID
     final updatedEvent = await _service.fetchEventById(_event.id);
-    print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
+    // print('DEBUG: Updated event fetched: ${updatedEvent?.id}, participants: ${updatedEvent?.currentParticipants}');
 
     // Fetch updated status
     final updatedStatus = await _service.getParticipantStatus(int.parse(_event.id));
-    print('DEBUG: Updated status from service: $updatedStatus');
+    // print('DEBUG: Updated status from service: $updatedStatus');
 
     if (mounted) {
       setState(() {
@@ -51,7 +51,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
           _currentParticipants = updatedEvent.currentParticipants;
         }
         _status = updatedStatus;
-        print('DEBUG: State updated - _status is now: $_status');
+        // print('DEBUG: State updated - _status is now: $_status');
       });
     }
   }
@@ -132,24 +132,29 @@ class _EventDetailScreen extends State<EventDetailScreen>{
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.deepSea,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
         title: const Text("Event Detail"),
       ),
       body: Column(
         children: [
-          // Scrollable Content wrapped in RefreshIndicator
           Expanded(
             child: RefreshIndicator(
-              // Triggered when user swipes down
+              color: AppColors.orangeSport,
+              backgroundColor: AppColors.deepSea,
               onRefresh: _refreshEventData,
               child: SingleChildScrollView(
-                // Ensure scroll view is always scrollable so refresh works even if content is short
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event Thumbnail (Using _event instead of widget.event)
                     SizedBox(
                       width: double.infinity,
                       height: 200,
@@ -158,13 +163,13 @@ class _EventDetailScreen extends State<EventDetailScreen>{
                         _event.thumbnail!,
                         fit: BoxFit.cover,
                         errorBuilder: (ctx, error, stack) => Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                          color: Colors.white10,
+                          child: const Icon(Icons.image_not_supported, size: 50, color: Colors.white24),
                         ),
                       )
                           : Container(
-                        color: Colors.blueAccent.withValues(alpha: 0.2),
-                        child: const Icon(Icons.event, size: 60, color: Colors.blueAccent),
+                        color: AppColors.deepSea, // Placeholder menggunakan Deep Sea
+                        child: const Icon(Icons.event, size: 60, color: AppColors.orangeSport),
                       ),
                     ),
 
@@ -173,48 +178,47 @@ class _EventDetailScreen extends State<EventDetailScreen>{
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Title
                           Text(
                             _event.title,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white, // Teks judul putih
                             ),
                           ),
                           const SizedBox(height: 8),
 
-                          // Organizer
                           Row(
                             children: [
-                              const Icon(Icons.person, size: 16, color: Colors.grey),
+                              const Icon(Icons.person, size: 16, color: AppColors.orangeSport), // Aksen oranye
                               const SizedBox(width: 4),
                               Text(
                                 "Organized by ${_event.organizer}",
-                                style: TextStyle(color: Colors.grey[700]),
+                                style: const TextStyle(color: Colors.white70), // Teks keterangan putih pudar
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
 
-                          // Tags (City, Sport)
                           Wrap(
                             spacing: 8,
                             children: [
                               Chip(
-                                label: Text(_event.city),
-                                avatar: const Icon(Icons.location_city, size: 16),
-                                backgroundColor: Colors.blue[50],
+                                label: Text(_event.city, style: const TextStyle(color: Colors.white)),
+                                avatar: const Icon(Icons.location_city, size: 16, color: Colors.white),
+                                backgroundColor: AppColors.deepSea, // Chip warna Deep Sea
+                                side: BorderSide.none,
                               ),
                               Chip(
-                                label: Text(_event.sportType),
-                                avatar: const Icon(Icons.sports, size: 16),
-                                backgroundColor: Colors.orange[50],
+                                label: Text(_event.sportType, style: const TextStyle(color: Colors.white)),
+                                avatar: const Icon(Icons.sports, size: 16, color: Colors.white),
+                                backgroundColor: AppColors.deepSea,
+                                side: BorderSide.none,
                               ),
                             ],
                           ),
                           const SizedBox(height: 24),
 
-                          // Info Grid
                           _buildInfoRow(Icons.calendar_today, "Date", _event.eventDate.toString().split(' ')[0]),
                           const SizedBox(height: 12),
                           _buildInfoRow(Icons.access_time, "Time", "${_event.startTime} - ${_event.endTime}"),
@@ -228,19 +232,18 @@ class _EventDetailScreen extends State<EventDetailScreen>{
                             highlight: isFull && _status != 'joined',
                           ),
 
-                          const Divider(height: 40),
+                          const Divider(height: 40, color: Colors.white10),
 
-                          // Description
                           const Text(
                             "About Event",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _event.description,
-                            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.white70),
                           ),
-                          const SizedBox(height: 80), // Space for bottom bar
+                          const SizedBox(height: 80),
                         ],
                       ),
                     ),
@@ -250,14 +253,13 @@ class _EventDetailScreen extends State<EventDetailScreen>{
             ),
           ),
 
-          // Fixed Bottom Button Area
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.deepSea, // Container bawah menggunakan Deep Sea
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -268,7 +270,7 @@ class _EventDetailScreen extends State<EventDetailScreen>{
                 width: double.infinity,
                 height: 50,
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.orangeSport))
                     : _buildActionButton(isFull),
               ),
             ),
@@ -279,87 +281,81 @@ class _EventDetailScreen extends State<EventDetailScreen>{
   }
 
   Widget _buildActionButton(bool isFull) {
-    // Check if event has ended (completed or cancelled)
     final bool eventEnded = _event.status.toLowerCase() == 'completed' ||
-                            _event.status.toLowerCase() == 'cancelled';
+        _event.status.toLowerCase() == 'cancelled';
 
-    // If user has joined the event (or attended, or cancelled their participation)
     if (_status == 'joined' || _status == 'attended' || _status == 'cancelled') {
-      // If user cancelled their participation, show appropriate message
       if (_status == 'cancelled') {
         return ElevatedButton(
-          onPressed: null, // Disabled
+          onPressed: null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
-            foregroundColor: Colors.grey[700],
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+            foregroundColor: Colors.white38,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: const Text("Cancelled", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         );
       }
 
-      // If event has not ended, show Leave button
       if (!eventEnded) {
         return ElevatedButton(
           onPressed: _isActionLoading ? null : _handleLeave,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red[50],
-            foregroundColor: Colors.red,
+            backgroundColor: AppColors.buttonDanger, // Merah untuk leave
+            foregroundColor: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: _isActionLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
               : const Text("Leave Event", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         );
       } else {
-        // Event has ended, show status
         return ElevatedButton(
-          onPressed: null, // Disabled
+          onPressed: null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
-            foregroundColor: Colors.grey[700],
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+            foregroundColor: Colors.white38,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text(
-            _status == 'attended' ? "Attended" : "Event Ended",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+              _status == 'attended' ? "Attended" : "Event Ended",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
           ),
         );
       }
     } else {
-      // User has not joined
-      // If event has ended, show disabled button
       if (eventEnded) {
         return ElevatedButton(
-          onPressed: null, // Disabled
+          onPressed: null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
-            foregroundColor: Colors.grey[700],
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+            foregroundColor: Colors.white38,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: const Text("Event Ended", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         );
       }
 
-      // Event is still active
       if (isFull) {
-        // Full State
         return ElevatedButton(
-          onPressed: null, // Disabled
+          onPressed: null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[300],
-            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+            foregroundColor: Colors.white38,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: const Text("Event Full", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         );
       } else {
-        // Active Join State
         return ElevatedButton(
           onPressed: _isActionLoading ? null : _handleJoin,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor, // Use your app's primary color
+            backgroundColor: AppColors.orangeSport, // Warna utama tombol join
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
@@ -374,18 +370,18 @@ class _EventDetailScreen extends State<EventDetailScreen>{
   Widget _buildInfoRow(IconData icon, String label, String value, {bool highlight = false}) {
     return Row(
       children: [
-        Icon(icon, color: highlight ? Colors.red : Colors.grey[600], size: 20),
+        Icon(icon, color: highlight ? Colors.red : AppColors.orangeSport, size: 20),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            Text(label, style: const TextStyle(fontSize: 12, color: Colors.white38)),
             Text(
               value,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: highlight ? Colors.red : Colors.black,
+                color: highlight ? Colors.red : Colors.white,
               ),
             ),
           ],

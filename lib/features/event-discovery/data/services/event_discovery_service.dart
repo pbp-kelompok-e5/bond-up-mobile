@@ -89,20 +89,20 @@ class EventDiscoveryService {
       );
 
       // Debug: Print the response to see what we're getting
-      print('DEBUG: Participant status response for event $eventId: $response');
+      // print('DEBUG: Participant status response for event $eventId: $response');
 
       // The Django view returns: {'status': '...', 'is_participant': true/false}
       if (response != null && response['status'] != null) {
         final status = response['status'].toString();
-        print('DEBUG: Extracted status: $status');
+        // print('DEBUG: Extracted status: $status');
         return status;
       }
 
-      print('DEBUG: Response was null or missing status field, returning not_participating');
+      // print('DEBUG: Response was null or missing status field, returning not_participating');
       return 'not_participating';
     } catch (e) {
       // Fallback in case of error (e.g., not logged in or network issue)
-      print('DEBUG: Error getting participant status: $e');
+      // print('DEBUG: Error getting participant status: $e');
       return 'not_participating';
     }
   }

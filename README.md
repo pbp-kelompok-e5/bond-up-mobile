@@ -96,8 +96,8 @@ Alur pengintegrasian dengan web service dapat dilihat pada file berikut:
 ## Getting Started
 
 ### Prerequisites
-- Flutter SDK (versi 3.9.2 atau lebih baru)
-- Dart SDK
+- Flutter SDK (versi 3.3.0 atau lebih baru)
+- Dart SDK (versi 3.3.0 atau lebih baru)
 - Android Studio / VS Code dengan Flutter extension
 - Android Emulator / iOS Simulator / Physical Device
 
@@ -105,8 +105,8 @@ Alur pengintegrasian dengan web service dapat dilihat pada file berikut:
 
 1. **Clone repository**
    ```bash
-   git clone <repository-url>
-   cd bond_up_mobile
+   git clone https://github.com/pbp-kelompok-e5/bond-up-mobile
+   cd bond-up-mobile
    ```
 
 2. **Install dependencies**
@@ -114,10 +114,24 @@ Alur pengintegrasian dengan web service dapat dilihat pada file berikut:
    flutter pub get
    ```
 
-4. **Run the app**
+3. **Run the app**
    ```bash
    flutter run
    ```
+
+### Running Tests
+
+```bash
+# Run all tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+
+# Run specific test file
+flutter test test/features/auth/data/services/auth_service_test.dart
+```
+
 ---
 
 ## Project Structure
@@ -146,16 +160,233 @@ bond_up_mobile/
 
 ---
 
+## Features Overview
+
+### Authentication & Profile
+**Developer:** Muhammad Hariz Albaari
+
+- **Login & Register** - Secure authentication with Django backend
+- **Profile Management** - View and edit user profiles
+- **Sport Preferences** - Manage favorite sports and skill levels
+- **Session Management** - Persistent login with secure token storage
+
+### Partner Matching
+**Developer:** Tsaniya Fini Ardiyanti
+
+- **Browse Users** - Discover other sports enthusiasts
+- **Advanced Filters** - Filter by sport, city, and skill level
+- **Connection System** - Send, accept, and reject connection requests
+- **User Recommendations** - Get matched with compatible partners
+
+### Event Discovery
+**Developer:** Farrell Bagoes Rahmantyo
+
+- **Browse Events** - Explore upcoming sports events
+- **Event Filters** - Filter by sport type, date, and location
+- **Event Search** - Search events by title and description
+- **Join/Leave Events** - Participate in events with one tap
+- **My Joined Events** - Track all your event participations
+
+### Event Management
+**Developer:** Muhammad Arief Solomon
+
+- **Create Events** - Organize new sports events
+- **Edit Events** - Update event details and settings
+- **Manage Participants** - View, remove, and mark attendance
+- **Event Status** - Track event status (open, full, completed, cancelled)
+- **My Events** - View upcoming and past events you organized
+
+### Review & Rating
+**Developer:** Gerry Bima Putra
+
+- **Event Reviews** - Rate participants after events
+- **User Reviews** - View reviews received and written
+- **Update/Delete Reviews** - Manage your submitted reviews
+- **Rating System** - 5-star rating with comments
+
+### Leaderboard & Points
+**Developer:** Muhammad Hariz Albaari
+
+- **Global Leaderboard** - Compete with other users
+- **Points Dashboard** - Track your points breakdown
+- **Points History** - View detailed transaction history
+- **Achievements** - Unlock badges and earn bonus points
+
+---
+
+## Tech Stack
+
+### Frontend
+- **Flutter** - Cross-platform mobile framework
+- **Dart** - Programming language
+- **Provider** - State management solution
+- **pbp_django_auth** - Django authentication integration
+
+### Backend Integration
+- **Django** - Backend 
+- **Session-based Auth** - Secure authentication
+- **JSON API** - RESTful data exchange
+
+### Key Dependencies
+```yaml
+dependencies:
+  flutter: sdk
+  provider: ^6.1.5+1              # State management
+  pbp_django_auth: ^0.4.0         # Django authentication
+  http: ^1.6.0                    # HTTP requests
+  shared_preferences: ^2.5.3      # Local storage
+  image_picker: ^1.2.1            # Image selection
+  intl: ^0.19.0                   # Date formatting
+
+dev_dependencies:
+  flutter_test: sdk
+  flutter_lints: ^5.0.0           # Linting rules
+  mockito: ^5.6.1                 # Testing mocks
+  build_runner: ^2.10.4           # Code generation
+```
+
+---
+
+## Design System
+
+BondUp Mobile implements a custom design system based on the web application's `.global.css` for visual consistency across platforms.
+
+### Color Palette
+- **Primary (Orange Sport):** `#FF6B35` - Main brand color
+- **Secondary (Deep Sea):** `#004E89` - Accent color
+- **Success:** `#28A745` - Success states
+- **Warning:** `#FFC107` - Warning states
+- **Danger:** `#DC3545` - Error states
+
+### Components
+- **AppButton** - Customizable buttons (primary, secondary, danger, success)
+- **AppTextField** - Styled input fields
+- **AppChip** - Sport and skill level chips
+- **DeepSeaCard** - Consistent card styling
+- **StatusBadge** - Event and connection status indicators
+
+For detailed design system documentation, see [core/DESIGN_SYSTEM.md](lib/core/DESIGN_SYSTEM.md)
+
+---
+
+## API Integration
+
+BondUp Mobile integrates with the Django backend API for all data operations.
+
+**Base URL:** `https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id`
+
+### Authentication Flow
+1. User logs in via `/auth/flutter/login/`
+2. Session cookie is stored using `pbp_django_auth`
+3. All subsequent requests include the session cookie
+4. Token is persisted using `shared_preferences`
+
+### Key Endpoints
+- **Auth:** `/auth/flutter/login/`, `/auth/flutter/register/`, `/auth/flutter/logout/`
+- **Profile:** `/profile/api/`, `/profile/update/`, `/profile/sports/`
+- **Partner Matching:** `/partner-matching/browse-users-api/`, `/partner-matching/connections/`
+- **Events:** `/event-discovery/events/json/`, `/event-management/create/`
+- **Reviews:** `/reviews/ajax/event/<id>/create/`, `/reviews/user/<id>/`
+- **Leaderboard:** `/leaderboard/api/flutter/leaderboard/`, `/leaderboard/api/flutter/points-dashboard/`
+
+For complete API documentation, see [docs/API_DOCS.md](docs/API_DOCS.md)
+
+---
+
+## State Management
+
+The app uses **Provider** for state management with the following providers:
+
+- **CookieRequest** - Global HTTP client with session management
+- **AuthService** - Authentication state and operations
+- **BrowseUsersProvider** - User browsing and filtering state
+- **ConnectionsProvider** - Connection requests and friends list state
+
+---
+
+## Testing
+
+The project includes comprehensive unit tests for critical components:
+
+### Test Coverage
+- ✅ **Auth Service** - Login, register, logout functionality
+- ✅ **Auth Models** - User model serialization
+- ✅ **Leaderboard Service** - API integration tests
+- ✅ **Leaderboard Models** - Entry and points history models
+- ✅ **Points History Models** - Transaction model tests
+
+### Running Tests
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage report
+flutter test --coverage
+
+# View coverage in browser (requires lcov)
+genhtml coverage/lcov.info -o coverage/html
+open coverage/html/index.html
+```
+
+---
+
+## Development Workflow
+
+### Git Workflow
+1. Create feature branch: `git checkout -b feature/nama-fitur`
+2. Make changes and commit: `git commit -m "feat: description"`
+3. Push to remote: `git push origin feature/nama-fitur`
+4. Create Pull Request to `main`
+5. Wait for review and approval
+6. Merge to `main`
+
+### Commit Message Convention
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code formatting
+- `refactor:` - Code refactoring
+- `test:` - Adding or updating tests
+- `chore:` - Maintenance tasks
+
+For detailed workflow guide, see [docs/WORKFLOW.md](docs/WORKFLOW.md)
+
+---
+
 ## Resources
-- [API Documentation](docs/API_DOCS.md)
-- [Team Workflow](docs/WORKFLOW.md)
+
+### Documentation
+- [API Documentation](docs/API_DOCS.md) - Complete API endpoint reference
+- [Team Workflow](docs/WORKFLOW.md) - Development workflow and best practices
+- [Design System](lib/core/DESIGN_SYSTEM.md) - UI component library
+- [Features Guide](docs/FEATURES.md) - Detailed feature documentation
+- [Testing Guide](docs/TESTING.md) - Testing strategy and best practices
+
+### External Links
+- [Figma Design](https://www.figma.com/design/FyD4mI3SwzVciuyidRCaim/Desain--Nama-Web-App-?node-id=0-1&t=sEvdR4GK5FUhPnUp-1)
+- [Backend Repository](https://github.com/pbp-kelompok-e5/sigma-app)
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Django Documentation](https://docs.djangoproject.com/)
+
+---
+
+## Contributing
+
+This is a course project for PBP 2025. Contributions are limited to team members.
+
+### Team Members
+- **Muhammad Hariz Albaari** - Authentication, Profile, Leaderboard
+- **Tsaniya Fini Ardiyanti** - Partner Matching
+- **Farrell Bagoes Rahmantyo** - Event Discovery
+- **Muhammad Arief Solomon** - Event Management
+- **Gerry Bima Putra** - Review & Rating
 
 ---
 
 ## License
 
-This project is developed as part of PBP 2025 course assignment.
+This project is developed as part of PBP 2025 course assignment at Universitas Indonesia.
 
 ---
 
-**Developed with ❤️ by E05 - PBP 2025**
+**Developed with ❤️ by Team E05 - PBP 2025**

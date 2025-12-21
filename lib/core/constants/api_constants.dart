@@ -17,5 +17,6 @@ class ApiConstants {
   /// 
   /// Change this value to switch between environments.
   static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id';
+  
+  static const String eventDiscoveryBaseUrl = '$baseUrl/event-discovery'; 
 }
-

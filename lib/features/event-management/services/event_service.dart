@@ -97,4 +97,37 @@ class EventService {
     );
     return res;
   }
+
+  /// Mengambil status partisipasi pengguna untuk acara tertentu.
+  /// Mengembalikan [Future] yang menghasilkan [String] status partisipasi.
+  /// Nilai yang mungkin: 'joined', 'attended', 'cancelled', 'not_participating'
+  Future<String> fetchParticipantStatus(int eventId) async {
+    try {
+      final res = await request.get("${ApiConstants.eventDiscoveryBaseUrl}/events/$eventId/participant-status/");
+      
+      if (res != null && res['status'] != null) {
+        return res['status'];
+      }
+      
+      return 'not_participating';
+    } catch (e) {
+      return 'not_participating';
+    }
+  }
+
+  /// Memungkinkan pengguna untuk bergabung ke suatu acara.
+  /// Mengembalikan [Future] yang menghasilkan [Map<String, dynamic>]
+  /// berisi respons dari backend.
+  Future<Map<String, dynamic>> joinEvent(int eventId) async {
+    final res = await request.postJson("${ApiConstants.eventDiscoveryBaseUrl}/events/$eventId/join/", {});
+    return res;
+  }
+
+  /// Memungkinkan pengguna untuk meninggalkan suatu acara.
+  /// Mengembalikan [Future] yang menghasilkan [Map<String, dynamic>]
+  /// berisi respons dari backend.
+  Future<Map<String, dynamic>> leaveEvent(int eventId) async {
+    final res = await request.postJson("${ApiConstants.eventDiscoveryBaseUrl}/events/$eventId/leave/", {});
+    return res;
+  }
 }

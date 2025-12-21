@@ -36,4 +36,16 @@ class EventDiscoveryService {
     );
     return res;
   }
+
+  /// Fetches the username of the currently logged-in user.
+  Future<String?> fetchCurrentUsername() async {
+    // Note: The base URL for authentication endpoints is different.
+    // Assuming the authentication API is at http://localhost:8000/auth/flutter/profile/
+    const authApiBase = "http://localhost:8000/auth/flutter"; 
+    final res = await request.get("$authApiBase/profile/");
+    if (res['status'] == true && res['data'] != null) {
+      return res['data']['user']['username'];
+    }
+    return null;
+  }
 }

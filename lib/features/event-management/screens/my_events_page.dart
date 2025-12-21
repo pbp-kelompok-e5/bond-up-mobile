@@ -6,8 +6,9 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../services/event_service.dart';
 import '../models/event.dart';
 import 'event_form_page.dart';
-import 'event_detail_page.dart';
 import 'participants_page.dart';
+import 'package:bond_up_mobile/features/event-discovery/screens/event_detail.page.dart';
+import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart' as discovery;
 
 /// Layar yang menampilkan daftar acara yang dibuat oleh pengguna saat ini.
 class MyEventsPage extends StatefulWidget {
@@ -45,7 +46,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Events'),
+        title: const Text('Manage Event'),
         actions: [
           // Tombol penyegar (refresh) di app bar.
           IconButton(
@@ -156,15 +157,33 @@ class _MyEventsPageState extends State<MyEventsPage> {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () async {
-          // Navigasi ke EventDetailPage saat kartu ditekan.
-          final updated = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => EventDetailPage(event: event)),
+          // Convert event-management Event to event-discovery Event
+          final discoveryEvent = discovery.Event(
+            id: event.id.toString(),
+            organizer: event.organizerUsername,
+            title: event.title,
+            description: event.description,
+            thumbnail: event.thumbnail,
+            sportType: event.sportType,
+            eventDate: event.eventDate,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            city: event.city,
+            locationName: event.locationName,
+            maxParticipants: event.maxParticipants,
+            currentParticipants: event.currentParticipants,
+            status: event.status,
+            createdAt: DateTime.now(), // Default value
+            updatedAt: DateTime.now(), // Default value
           );
-          // Segarkan daftar jika ada perubahan pada halaman detail.
-          if (updated == true) {
-            _refresh();
-          }
+
+          // Navigasi ke EventDetailScreen dari event-discovery module
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => EventDetailScreen(event: discoveryEvent)),
+          );
+          // Segarkan daftar setelah kembali dari halaman detail
+          _refresh();
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

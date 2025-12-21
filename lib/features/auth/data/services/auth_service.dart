@@ -9,7 +9,7 @@ import 'package:bond_up_mobile/core/constants/api_constants.dart';
 class AuthService {
   /// Base URL for API requests - imported from centralized API constants
   static const String baseUrl = ApiConstants.baseUrl;
-
+  
   final CookieRequest request;
 
   AuthService(this.request);

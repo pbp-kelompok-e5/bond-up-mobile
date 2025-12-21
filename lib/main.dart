@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:bond_up_mobile/app/app_theme.dart';
@@ -11,7 +12,15 @@ import 'package:bond_up_mobile/features/partner_matching/logic/connections_provi
 // Kita tidak perlu import MyHomePage di sini kecuali jika ingin testing langsung di home:
 // import 'package:bond_up_mobile/features/home/screens/home_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock orientation to portrait mode only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(const MyApp());
 }
 
