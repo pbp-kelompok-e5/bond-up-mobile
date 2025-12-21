@@ -6,7 +6,8 @@ import 'package:bond_up_mobile/features/event-discovery/data/services/event_disc
 import 'package:bond_up_mobile/features/event-discovery/widget/my_event_filterbar.dart';
 import 'package:bond_up_mobile/features/event-discovery/screens/event_detail.page.dart';
 import 'package:bond_up_mobile/core/widgets/navigation/app_drawer.dart';
-
+// Import AppColors untuk konsistensi warna
+import '../../../core/theme/app_colors.dart';
 import '../widget/event_tile.dart';
 
 class MyEventScreen extends StatefulWidget{
@@ -42,7 +43,6 @@ class _MyEventScreen extends State<MyEventScreen>{
   Future<void> _fetchMyEvents() async {
     try {
       final request = context.read<CookieRequest>();
-      // Menggunakan service fetchMyEvents
       final events = await _service.fetchMyEvents(request);
 
       if (mounted) {
@@ -76,41 +76,30 @@ class _MyEventScreen extends State<MyEventScreen>{
 
     setState(() {
       _filteredEvents = _allEvents.where((event) {
-        // 1. Filter Status (Upcoming vs Finished)
-        // Logika sederhana: Berdasarkan Tanggal
-        // Jika Anda punya field 'status' di model yang akurat, gunakan itu.
-        // Di sini kita pakai logika tanggal sebagai fallback/utama.
         bool statusMatch = true;
         if (_currentFilter.status == 'upcoming') {
-          // Tanggal event belum lewat
           statusMatch = event.eventDate.isAfter(now) || isSameDay(event.eventDate, now);
         } else if (_currentFilter.status == 'finished') {
-          // Tanggal event sudah lewat
           statusMatch = event.eventDate.isBefore(now) && !isSameDay(event.eventDate, now);
         }
 
-        // 2. Filter Olahraga
         bool sportMatch = true;
         if (_currentFilter.sports.isNotEmpty) {
-          // Cek apakah sportType event ada di set yang dipilih
-          // Pastikan case insensitive atau sesuaikan key-nya
           sportMatch = _currentFilter.sports.contains(event.sportType);
         }
 
-        // 3. Filter Kota
         bool cityMatch = true;
         if (_currentFilter.cities.isNotEmpty) {
           cityMatch = _currentFilter.cities.contains(event.city);
         }
 
-        // 4. Filter Waktu
         bool timeMatch = true;
         if (_currentFilter.timeType == '30_days') {
           final thirtyDaysAgo = now.subtract(const Duration(days: 30));
           timeMatch = event.eventDate.isAfter(thirtyDaysAgo);
         } else if (_currentFilter.timeType == 'custom' && _currentFilter.customDateRange != null) {
           final start = _currentFilter.customDateRange!.start;
-          final end = _currentFilter.customDateRange!.end.add(const Duration(days: 1)); // Include end day
+          final end = _currentFilter.customDateRange!.end.add(const Duration(days: 1));
           timeMatch = event.eventDate.isAfter(start) && event.eventDate.isBefore(end);
         }
 
@@ -119,7 +108,6 @@ class _MyEventScreen extends State<MyEventScreen>{
     });
   }
 
-  // Helper simple check same day
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
@@ -128,23 +116,25 @@ class _MyEventScreen extends State<MyEventScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // UBAH WARNA DI SINI:
-        // Gunakan warna primary agar lebih tegas sebagai background
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        // foregroundColor memaksa semua text dan icon di AppBar (termasuk drawer) menjadi Putih
-        foregroundColor: Colors.white,
+        // Menyamakan styling dengan EventDiscoveryScreen
+        backgroundColor: AppColors.deepSea,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: const TextStyle(
+          color: AppColors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
         title: const Text("My Events"),
       ),
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // 1. FILTER BAR
           FilterBarSection(
             onFilterChanged: _handleFilterChanged,
           ),
           const Divider(height: 1),
-
-          // 2. LIST EVENT
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -160,7 +150,6 @@ class _MyEventScreen extends State<MyEventScreen>{
                   return EventCard(
                     event: event,
                     onTap: () async {
-                      // Navigasi ke Detail
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -192,7 +181,6 @@ class _MyEventScreen extends State<MyEventScreen>{
           const SizedBox(height: 8),
           TextButton(
             onPressed: () {
-              // Reset filter logic here if needed or just fetch
               _fetchMyEvents();
             },
             child: const Text("Muat Ulang"),

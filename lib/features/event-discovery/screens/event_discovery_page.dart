@@ -7,6 +7,7 @@ import 'package:bond_up_mobile/features/event-discovery/widget/disc_event_filter
 import 'package:bond_up_mobile/features/event-discovery/screens/event_detail.page.dart';
 import 'package:bond_up_mobile/core/widgets/navigation/app_drawer.dart';
 import 'package:bond_up_mobile/features/event-discovery/screens/event_search_page.dart';
+import '../../../core/theme/app_colors.dart';
 import '../widget/event_tile.dart';
 
 class EventDiscoveryScreen extends StatefulWidget{
@@ -147,11 +148,15 @@ class _EventDiscoveryScreenState extends State<EventDiscoveryScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // UBAH WARNA DI SINI:
-        // Gunakan warna primary agar lebih tegas sebagai background
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        // foregroundColor memaksa semua text dan icon di AppBar (termasuk drawer) menjadi Putih
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.deepSea,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
         title: _buildSearchBar(),
         actions: [
           if (_searchQuery.isNotEmpty)
@@ -216,22 +221,23 @@ class _EventDiscoveryScreenState extends State<EventDiscoveryScreen>{
       onTap: _navigateToSearch,
       child: Container(
         height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+        decoration: const BoxDecoration(
+          color: Colors.transparent,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Row(
           children: [
-            const Icon(Icons.search, color: Colors.grey),
+            const Icon(Icons.search, color: Colors.white),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                _searchQuery.isEmpty ? "Cari event..." : _searchQuery,
+                _searchQuery.isEmpty ? "Cari event apa?" : _searchQuery,
                 style: TextStyle(
-                  color: _searchQuery.isEmpty ? Colors.grey : Colors.black87,
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal, // Override style AppBar
+                  color: _searchQuery.isEmpty
+                      ? Colors.white.withValues(alpha: 0.4)
+                      : Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bond_up_mobile/features/event-discovery/screens/event_discovery_page.dart';
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
 
 class EventSearchPage extends StatefulWidget {
   final bool fromDiscovery;
@@ -12,29 +13,22 @@ class EventSearchPage extends StatefulWidget {
 class _EventSearchPageState extends State<EventSearchPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  // Menggunakan static agar history tersimpan selama aplikasi berjalan (tidak hilang saat back)
-  // Jika ingin tersimpan permanen setelah restart, perlu pakai SharedPreferences.
   static List<String> searchHistory = [];
 
   void _onSearchSubmitted(String query) {
     if (query.trim().isEmpty) return;
 
     setState(() {
-      // Hapus jika sudah ada (supaya pindah ke paling depan)
       searchHistory.remove(query);
-      // Masukkan ke index 0 (paling awal)
       searchHistory.insert(0, query);
-      // Batasi hanya 10 item
       if (searchHistory.length > 10) {
         searchHistory.removeLast();
       }
     });
 
     if (widget.fromDiscovery) {
-      // Jika dari Discovery, cukup kembalikan nilainya
       Navigator.pop(context, query);
     } else {
-      // Jika dari screen lain (misal Home), pindah ke Discovery dengan query
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -47,27 +41,39 @@ class _EventSearchPageState extends State<EventSearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Menggunakan warna background abu-abu gelap seperti EventHistory
+      backgroundColor: AppColors.darkGrayBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.deepSea,
+        foregroundColor: AppColors.white,
         elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: TextField(
           controller: _searchController,
-          autofocus: true, // Langsung muncul keyboard
+          autofocus: true,
+          // Mengubah warna teks input menjadi putih
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: "Cari event apa?",
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
           ),
           textInputAction: TextInputAction.search,
           onSubmitted: _onSearchSubmitted,
         ),
       ),
       body: Container(
-        color: Colors.white,
+        // Memastikan container mengikuti warna background utama
+        color: AppColors.darkGrayBackground,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,35 +83,36 @@ class _EventSearchPageState extends State<EventSearchPage> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.white, // Teks judul menjadi putih
               ),
             ),
             const SizedBox(height: 16),
             if (searchHistory.isEmpty)
               Text(
                 "Belum ada riwayat pencarian",
-                style: TextStyle(color: Colors.grey.shade500),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
               )
             else
               Wrap(
-                spacing: 8.0, // Jarak horizontal antar chip
-                runSpacing: 4.0, // Jarak vertical antar baris
+                spacing: 8.0,
+                runSpacing: 8.0,
                 children: searchHistory.map((historyItem) {
                   return ActionChip(
                     label: Text(historyItem),
-                    labelStyle: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
+                    labelStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
                     ),
-                    backgroundColor: Colors.white,
+                    // Menggunakan warna Deep Sea untuk background chip
+                    backgroundColor: AppColors.deepSea,
+                    // Border menggunakan warna Orange Sport agar senada dengan UI utama
                     side: BorderSide(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                      color: AppColors.orangeSport.withValues(alpha: 0.5),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     onPressed: () {
-                      // Jika chip ditekan, langsung cari
                       _onSearchSubmitted(historyItem);
                     },
                   );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bond_up_mobile/features/event-discovery/data/models/event_model.dart';
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -18,7 +19,7 @@ class EventCard extends StatelessWidget {
         width: 200, // Memberikan lebar tetap agar cocok di scroll horizontal maupun vertikal
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.deepSea,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
           boxShadow: [
@@ -69,7 +70,7 @@ class EventCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+                      color: Colors.white,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -79,7 +80,7 @@ class EventCard extends StatelessWidget {
                   // Row untuk Tanggal
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey[600]),
+                      Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.orangeSport),
                       const SizedBox(width: 6),
                       Text(
                         _formatDate(event.eventDate),
@@ -92,7 +93,7 @@ class EventCard extends StatelessWidget {
                   // Row untuk Lokasi
                   Row(
                     children: [
-                      Icon(Icons.location_on_rounded, size: 14, color: Colors.grey[600]),
+                      Icon(Icons.location_on_rounded, size: 14, color: AppColors.orangeSport),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
