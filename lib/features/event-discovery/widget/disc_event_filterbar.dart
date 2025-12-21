@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
 import 'package:bond_up_mobile/features/profile/data/services/profile_service.dart';
+import 'package:bond_up_mobile/core/theme/app_colors.dart';
+
 
 // Class untuk menampung state filter
 class FilterData {
@@ -161,6 +163,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.darkGrayBackground,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
@@ -177,7 +180,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                     const Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Text('Pilih Olahraga',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color:Colors.white)),
                     ),
                     Expanded(
                       child: ListView.builder(
@@ -187,7 +190,9 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                           final sport = AppConstants.sortedSports[index];
                           final isSelected = _selectedSports.contains(sport.key);
                           return CheckboxListTile(
-                            title: Text(sport.value),
+                            title: Text(sport.value, style: const TextStyle(color: Colors.white)),
+                            activeColor: AppColors.orangeSport,
+                            side: const BorderSide(color: Colors.white24),
                             value: isSelected,
                             onChanged: (bool? value) {
                               setState(() {
@@ -218,6 +223,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
   void _showTimeFilter(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.darkGrayBackground,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
@@ -253,20 +259,24 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                     child: Column(
                       children: [
                         const RadioListTile<String>(
-                          title: Text('Semua Tanggal Event'),
+                          title: Text('Semua Tanggal Event', style: TextStyle(color: Colors.white),),
                           value: 'all',
+                          activeColor: AppColors.orangeSport,
                           contentPadding: EdgeInsets.zero,
                         ),
                         const RadioListTile<String>(
-                          title: Text('7 Hari Kedepan'),
+                          title: Text('7 Hari Kedepan',style: TextStyle(color: Colors.white),),
                           value: '7_days',
+                          activeColor: AppColors.orangeSport,
                           contentPadding: EdgeInsets.zero,
                         ),
                         RadioListTile<String>(
                           title: Text(_customDateRange == null
                               ? 'Pilih Rentang Tanggal'
-                              : '${DateFormat('dd/MM/yyyy').format(_customDateRange!.start)} s/d ${DateFormat('dd/MM/yyyy').format(_customDateRange!.end)}'),
+                              : '${DateFormat('dd/MM/yyyy').format(_customDateRange!.start)} s/d ${DateFormat('dd/MM/yyyy').format(_customDateRange!.end)}'
+                          ,style: const TextStyle(color: Colors.white),),
                           value: 'custom',
+                          activeColor: AppColors.orangeSport,
                           contentPadding: EdgeInsets.zero,
                         ),
                       ],
@@ -287,6 +297,7 @@ class _FilterBarSectionState extends State<FilterBarSection> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.darkGrayBackground,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
@@ -309,13 +320,19 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Pilih Kota',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                           const SizedBox(height: 12),
                           TextField(
+                            style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: 'Cari kota...',
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              hintStyle: const TextStyle(color: Colors.white38),
+                              prefixIcon: const Icon(Icons.search, color: AppColors.orangeSport,),
+                              fillColor: AppColors.deepSea,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                               contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                             ),
                             onChanged: (val) {
@@ -335,7 +352,9 @@ class _FilterBarSectionState extends State<FilterBarSection> {
                           final city = filteredCities[index];
                           final isSelected = _selectedCities.contains(city.key);
                           return CheckboxListTile(
-                            title: Text(city.value),
+                            title: Text(city.value, style: const TextStyle(color: Colors.white)),
+                            activeColor: AppColors.orangeSport,
+                            side: const BorderSide(color: Colors.white24),
                             value: isSelected,
                             onChanged: (bool? value) {
                               setState(() {
@@ -373,18 +392,18 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       initialDateRange: _customDateRange,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      // Builder untuk mengubah tema warna agar sesuai (Hijau)
+      // Builder untuk mengubah tema warna agar sesuai
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Colors.green, // Warna Header & Seleksi
+              primary: AppColors.orangeSport, // Warna Header & Seleksi
               onPrimary: Colors.white, // Warna Teks di Header
-              onSurface: Colors.black, // Warna Teks Tanggal
+              onSurface: Colors.white, // Warna Teks Tanggal
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.green, // Warna tombol Cancel/Save
+                foregroundColor: AppColors.orangeSport,
               ),
             ),
           ),
@@ -429,9 +448,9 @@ class _FilterChipButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : Colors.grey.shade100,
+          color: isActive ? AppColors.deepSea.withValues(alpha: 0.8) : AppColors.deepSea.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey.shade300),
+          border: Border.all(color: isActive ? AppColors.orangeSport : AppColors.orangeSport),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -439,12 +458,12 @@ class _FilterChipButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Theme.of(context).colorScheme.primary : Colors.black87,
+                color: isActive ? AppColors.orangeSport : AppColors.orangeSport,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down, size: 18, color: isActive ? Theme.of(context).colorScheme.primary : Colors.black54),
+            Icon(Icons.keyboard_arrow_down, size: 18, color:  AppColors.orangeSport),
           ],
         ),
       ),
