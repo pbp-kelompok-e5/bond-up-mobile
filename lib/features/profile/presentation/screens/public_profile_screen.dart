@@ -13,6 +13,7 @@ import 'package:bond_up_mobile/features/profile/presentation/widgets/user_stats_
 
 // --- IMPORTS FEATURE LAIN ---
 import 'package:bond_up_mobile/features/reviews/data/models/user_review.dart';
+import 'package:bond_up_mobile/features/reviews/presentation/screens/user_reviews_page.dart';
 import 'package:bond_up_mobile/features/partner_matching/data/models/user_match_model.dart';
 import 'package:bond_up_mobile/features/partner_matching/data/services/partner_matching_service.dart';
 
@@ -502,7 +503,18 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   /// Section Reviews
   Widget _buildReviewsSection() {
     return DeepSeaCard(
-      header: const Text('Reviews Received', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+      header: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Reviews Received', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => UserReviewsPage(userId: widget.userId)));
+            },
+            child: const Text('See All', style: TextStyle(color: AppColors.orangeSport, fontSize: 14)),
+          ),
+        ],
+      ),
       body: _isLoadingReviews
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.orangeSport))
           : _recentReviews.isEmpty
