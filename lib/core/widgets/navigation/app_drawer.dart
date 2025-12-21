@@ -10,6 +10,7 @@ import 'package:bond_up_mobile/features/event-discovery/screens/event_dicovery_h
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/points_dashboard_screen.dart';
 import 'package:bond_up_mobile/features/event-management/screens/my_events_page.dart';
+import 'package:bond_up_mobile/features/event-management/screens/event_history_page.dart';
 import 'package:bond_up_mobile/features/partner_matching/presentation/screens/browse_users_screen.dart';
 
 /// App-wide navigation drawer
@@ -88,10 +89,19 @@ class AppDrawer extends StatelessWidget {
                   _buildModernDrawerItem(
                     context: context,
                     icon: Icons.calendar_month_rounded,
-                    title: 'Events',
+                    title: 'Manage Events',
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const MyEventsPage()));
+                    },
+                  ),
+                  _buildModernDrawerItem(
+                    context: context,
+                    icon: Icons.history_rounded,
+                    title: 'Event History',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EventHistoryPage()));
                     },
                   ),
                   _buildModernDrawerItem(
@@ -275,14 +285,29 @@ class AppDrawer extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2F3F),
+        backgroundColor: const Color(0xFF1E2F3F), // Background gelap
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Logout', style: TextStyle(color: Colors.white)),
-        content: const Text('Apakah kamu yakin ingin mengakhiri sesi ini?', style: TextStyle(color: Colors.white70)),
+        content: const Text(
+          'Apakah kamu yakin ingin mengakhiri sesi ini?', 
+          style: TextStyle(color: Colors.white70)
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Batal')),
+          // Mengubah warna teks menjadi putih/terang agar terlihat di background gelap
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(
+              'Batal', 
+              style: TextStyle(color: Colors.white), // Ubah warna di sini
+            ),
+          ),
+          
+          // Menambahkan foregroundColor agar teks di dalam tombol merah pasti berwarna putih
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white, // Pastikan teks berwarna putih
+            ),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Ya, Logout'),
           ),
@@ -300,7 +325,6 @@ class AppDrawer extends StatelessWidget {
       }
     }
   }
-
   /// Widget kecil untuk placeholder loading (efek skeleton).
   Widget _buildSkeleton(double width, double height) {
     return Container(
