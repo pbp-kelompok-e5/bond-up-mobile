@@ -47,8 +47,7 @@ jobs:
           alias: release
           keyStorePassword: ${{ secrets.KEY_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-        # Catatan: Pastikan 'alias' di keystore Anda benar bernama 'release'. 
-        # Di script lama Anda tertulis '"$apk" release', jadi saya asumsikan alias-nya adalah 'release'.
+          buildToolsVersion: 34.0.0
 
       - name: Get current date
         id: date

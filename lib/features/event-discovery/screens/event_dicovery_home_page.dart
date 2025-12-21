@@ -3,6 +3,7 @@ import 'package:bond_up_mobile/features/event-discovery/screens/event_search_pag
 import 'package:bond_up_mobile/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:bond_up_mobile/core/widgets/navigation/app_drawer.dart';
 import 'package:bond_up_mobile/core/theme/app_colors.dart';
+import 'package:bond_up_mobile/features/partner_matching/presentation/screens/browse_users_screen.dart';
 
 import 'event_discovery_page.dart';
 
@@ -60,7 +61,7 @@ class EventDiscoveryHomePage extends StatelessWidget {
                       title: "Cari Partner",
                       subtitle: "Teman olahraga",
                       icon: Icons.emoji_people_outlined,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const EventSearchPage())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BrowseUsersScreen())),
                     ),
                     _buildFeaturedCard(
                       context,
