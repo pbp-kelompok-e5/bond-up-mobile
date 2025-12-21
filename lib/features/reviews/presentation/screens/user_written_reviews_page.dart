@@ -4,7 +4,6 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/reviews/data/models/user_written_review.dart';
 import 'package:bond_up_mobile/core/constants/api_constants.dart';
-import 'package:bond_up_mobile/core/theme/app_colors.dart'; // Pastikan path ini benar
 
 class UserWrittenReviewsPage extends StatefulWidget {
   const UserWrittenReviewsPage({super.key});
@@ -139,7 +138,7 @@ class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
           // Overlay loading pas lagi delete/update biar user gak klik-klik sembarangan
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(child: CircularProgressIndicator(color: AppColors.orangeSport)),
             ),
         ],
@@ -155,7 +154,7 @@ class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),

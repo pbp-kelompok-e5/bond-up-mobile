@@ -3,15 +3,12 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bond_up_mobile/features/auth/data/models/auth_response.dart';
 import 'package:bond_up_mobile/features/auth/data/models/user_model.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 /// Authentication service for handling login, register, and logout
 class AuthService {
-  // TODO: Replace with your actual Django backend URL
-  // For Android emulator: http://10.0.2.2:8000
-  // For web/Chrome: http://localhost:8000
-  // For production: https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id
-  // static const String baseUrl = 'https://farrell-bagoes-sigmaapp.pbp.cs.ui.ac.id/';
-  static const String baseUrl = 'http://localhost:8000';
+  /// Base URL for API requests - imported from centralized API constants
+  static const String baseUrl = ApiConstants.baseUrl;
   
   final CookieRequest request;
 
