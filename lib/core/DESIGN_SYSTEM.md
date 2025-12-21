@@ -4,466 +4,244 @@ This design system is a Flutter implementation of the `.global.css` design syste
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Installation](#installation)
+- [Core Module Structure](#core-module-structure)
 - [Color Palette](#color-palette)
 - [Components](#components)
-  - [Buttons](#buttons)
-  - [Chips](#chips)
-  - [Cards](#cards)
-  - [Text Fields](#text-fields)
-  - [Status Badges](#status-badges)
-  - [Toasts](#toasts)
-- [Theme](#theme)
-- [Examples](#examples)
+- [Constants](#constants)
+- [Theme Configuration](#theme-configuration)
+- [Design System Mapping](#design-system-mapping)
+- [Best Practices](#best-practices)
+
+## Overview
+
+The BondUp core module provides a comprehensive design system that includes:
+- **Theme**: Centralized color palette and styling configurations
+- **Widgets**: Reusable UI components (buttons, cards, chips, inputs, badges, navigation)
+- **Utils**: Helper utilities for toasts and notifications
+- **Constants**: Application-wide constants (API config, cities, sports, skill levels)
+
+All components are designed to match the web application's visual language while following Flutter best practices and Material Design 3 guidelines.
 
 ## Installation
 
-Import the design system in your Dart files:
+Import the entire design system (recommended):
 
 ```dart
 import 'package:bond_up_mobile/core/design_system.dart';
 ```
 
-Or import specific components:
+Or import specific modules as needed:
 
 ```dart
 import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:bond_up_mobile/core/widgets/buttons/app_button.dart';
+import 'package:bond_up_mobile/core/constants/app_constants.dart';
+```
+
+## Core Module Structure
+
+```
+lib/core/
+├── design_system.dart          # Main export file for all components
+├── DESIGN_SYSTEM.md           # This documentation
+├── constants/
+│   ├── api_constants.dart     # API base URL configuration
+│   └── app_constants.dart     # Cities, sports, skill levels
+├── theme/
+│   └── app_colors.dart        # Complete color palette
+├── utils/
+│   └── toast_utils.dart       # Toast notification utilities
+└── widgets/
+    ├── badges/
+    │   └── status_badge.dart  # Status indicators (active, cancelled, completed)
+    ├── buttons/
+    │   └── app_button.dart    # Customizable button component
+    ├── cards/
+    │   └── deep_sea_card.dart # Deep sea themed card component
+    ├── chips/
+    │   └── app_chip.dart      # Selectable chip component
+    ├── inputs/
+    │   └── app_text_field.dart # Styled text input field
+    └── navigation/
+        └── app_drawer.dart    # App-wide navigation drawer
 ```
 
 ## Color Palette
 
 ### Brand Colors
+The primary brand colors define BondUp's visual identity:
 
-```dart
-AppColors.orangeSport        // #F26419 - Primary brand color
-AppColors.orangeSportHover   // #D94F0F - Hover state
-AppColors.orangeSportActive  // #C0430D - Active/pressed state
+- **Orange Sport** (`#F26419`) - Primary brand color with hover and active states
+- **Deep Sea** (`#00063D`) - Secondary brand color with light and lighter variants
 
-AppColors.deepSea           // #00063D - Secondary brand color
-AppColors.deepSeaLight      // #1A1F5C - Light variant
-AppColors.deepSeaLighter    // #2A2F6C - Lighter variant
-```
+### Semantic Colors
+Colors organized by purpose for consistent UI feedback:
 
-### Button Colors
+- **Button Colors**: Secondary (`#6B7280`), Danger (`#DC2626`), Success (`#16A34A`)
+- **Status Colors**: Active/Green (`#22C55E`), Cancelled/Red (`#EF4444`), Completed/Blue (`#3B82F6`)
+- **Utility Colors**: Gray scale (50-900), white, black, dark gray background
 
-```dart
-AppColors.buttonSecondary       // #6B7280
-AppColors.buttonDanger          // #DC2626
-AppColors.buttonSuccess         // #16A34A
-```
-
-### Status Colors
-
-```dart
-AppColors.statusActive          // #22C55E - Green
-AppColors.statusCancelled       // #EF4444 - Red
-AppColors.statusCompleted       // #3B82F6 - Blue
-```
+All colors are defined in `lib/core/theme/app_colors.dart` with proper naming conventions and opacity variants.
 
 ## Components
 
-### Buttons
-
-The `AppButton` widget provides a consistent button design with multiple variants and sizes.
-
-#### Basic Usage
-
-```dart
-AppButton(
-  text: 'Click Me',
-  onPressed: () {
-    // Handle button press
-  },
-)
-```
-
-#### Variants
-
-```dart
-// Primary (default)
-AppButton(
-  text: 'Primary',
-  variant: ButtonVariant.primary,
-  onPressed: () {},
-)
-
-// Secondary
-AppButton(
-  text: 'Secondary',
-  variant: ButtonVariant.secondary,
-  onPressed: () {},
-)
-
-// Outline
-AppButton(
-  text: 'Outline',
-  variant: ButtonVariant.outline,
-  onPressed: () {},
-)
-
-// Danger
-AppButton(
-  text: 'Delete',
-  variant: ButtonVariant.danger,
-  onPressed: () {},
-)
-
-// Success
-AppButton(
-  text: 'Confirm',
-  variant: ButtonVariant.success,
-  onPressed: () {},
-)
-```
-
-#### Sizes
-
-```dart
-// Small
-AppButton(
-  text: 'Small',
-  size: ButtonSize.small,
-  onPressed: () {},
-)
-
-// Medium (default)
-AppButton(
-  text: 'Medium',
-  size: ButtonSize.medium,
-  onPressed: () {},
-)
-
-// Large
-AppButton(
-  text: 'Large',
-  size: ButtonSize.large,
-  onPressed: () {},
-)
-```
-
-#### Full Width
-
-```dart
-AppButton(
-  text: 'Full Width Button',
-  isFullWidth: true,
-  onPressed: () {},
-)
-```
-
-#### With Icon
-
-```dart
-AppButton(
-  text: 'Add Item',
-  icon: const Icon(Icons.add, color: Colors.white),
-  onPressed: () {},
-)
-```
-
-#### Loading State
-
-```dart
-AppButton(
-  text: 'Submit',
-  isLoading: true,
-  onPressed: () {},
-)
-```
-
-### Chips
-
-The `AppChip` widget provides selectable/filterable chip components.
-
-#### Basic Usage
-
-```dart
-AppChip(
-  label: 'Basketball',
-  onTap: () {
-    // Handle chip tap
-  },
-)
-```
-
-#### Variants
-
-```dart
-// Primary (bold bordered)
-AppChip(
-  label: 'Primary',
-  variant: ChipVariant.primary,
-  onTap: () {},
-)
-
-// Secondary (subtle)
-AppChip(
-  label: 'Secondary',
-  variant: ChipVariant.secondary,
-  onTap: () {},
-)
-
-// Filled
-AppChip(
-  label: 'Filled',
-  variant: ChipVariant.filled,
-  onTap: () {},
-)
-```
-
-#### States
-
-```dart
-// Active state
-AppChip(
-  label: 'Selected',
-  isActive: true,
-  onTap: () {},
-)
-
-// Disabled state
-AppChip(
-  label: 'Disabled',
-  isDisabled: true,
-  onTap: () {},
-)
-```
-
-#### With Delete
-
-```dart
-AppChip(
-  label: 'Removable',
-  onTap: () {},
-  onDelete: () {
-    // Handle delete
-  },
-)
-```
-
-### Cards
-
-The `DeepSeaCard` widget provides a dark-themed card with hover effects.
-
-#### Basic Usage
-
-```dart
-DeepSeaCard(
-  body: const Text('Card content goes here'),
-)
-```
-
-#### With Header and Footer
-
-```dart
-DeepSeaCard(
-  header: const Text('Event Details'),
-  body: const Text('Join us for an exciting basketball match!'),
-  footer: Row(
-    children: [
-      AppButton(
-        text: 'Join',
-        size: ButtonSize.small,
-        onPressed: () {},
-      ),
-    ],
-  ),
-)
-```
-
-#### Clickable Card
-
-```dart
-DeepSeaCard(
-  body: const Text('Tap me'),
-  onTap: () {
-    // Handle card tap
-  },
-)
-```
-
-### Text Fields
-
-The `AppTextField` widget provides styled text input fields.
-
-#### Basic Usage
-
-```dart
-AppTextField(
-  label: 'Email',
-  hint: 'Enter your email',
-  controller: emailController,
-)
-```
-
-#### Password Field
-
-```dart
-AppTextField(
-  label: 'Password',
-  hint: 'Enter your password',
-  obscureText: true,
-  controller: passwordController,
-)
-```
-
-#### With Error
-
-```dart
-AppTextField(
-  label: 'Username',
-  hint: 'Enter username',
-  errorText: 'Username is required',
-  controller: usernameController,
-)
-```
-
-#### Multiline
-
-```dart
-AppTextField(
-  label: 'Description',
-  hint: 'Enter description',
-  maxLines: 5,
-  controller: descriptionController,
-)
-```
-
-### Status Badges
-
-The `StatusBadge` widget displays event or item status.
-
-#### Usage
-
-```dart
-// Active status
-StatusBadge(status: StatusType.active)
-
-// Cancelled status
-StatusBadge(status: StatusType.cancelled)
-
-// Completed status
-StatusBadge(status: StatusType.completed)
-
-// Custom label
-StatusBadge(
-  status: StatusType.active,
-  customLabel: 'ONGOING',
-)
-```
-
-### Toasts
-
-The `ToastUtils` class provides toast notifications.
-
-#### Usage
-
-```dart
-// Success toast
-ToastUtils.showSuccess(context, 'Operation successful!');
-
-// Error toast
-ToastUtils.showError(context, 'Something went wrong!');
-
-// Warning toast
-ToastUtils.showWarning(context, 'Please check your input.');
-
-// Info toast
-ToastUtils.showInfo(context, 'This is an informational message.');
-
-// Custom toast
-ToastUtils.showToast(
-  context,
-  message: 'Custom message',
-  type: ToastType.success,
-  duration: const Duration(seconds: 5),
-);
-```
-
-## Theme
-
-The app theme is configured in `lib/app/app_theme.dart` and applied in `main.dart`.
-
-### Using Theme in main.dart
-
-```dart
-import 'package:bond_up_mobile/app/app_theme.dart';
-
-MaterialApp(
-  theme: AppTheme.lightTheme,
-  // ...
-)
-```
-
-### Accessing Theme Colors
-
-```dart
-// Using AppColors directly
-Container(
-  color: AppColors.orangeSport,
-)
-
-// Using theme
-Container(
-  color: Theme.of(context).colorScheme.primary,
-)
-```
-
-## Examples
-
-See `lib/core/widgets/examples/design_system_demo.dart` for a complete demo of all components.
-
-To view the demo, navigate to the DesignSystemDemo widget:
-
-```dart
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => const DesignSystemDemo(),
-  ),
-);
-```
+### Buttons (`AppButton`)
+Customizable button component with multiple variants and sizes.
+
+**Variants**: `primary`, `secondary`, `outline`, `danger`, `success`  
+**Sizes**: `small`, `medium`, `large`  
+**Features**: Full width option, icon support, loading state, disabled state
+
+See `lib/core/widgets/buttons/app_button.dart` for implementation details.
+
+### Chips (`AppChip`)
+Selectable chip component for filters and tags.
+
+**Variants**: `primary`, `secondary`, `filled`  
+**States**: Active, disabled  
+**Features**: Delete callback, custom styling
+
+See `lib/core/widgets/chips/app_chip.dart` for implementation details.
+
+### Cards (`DeepSeaCard`)
+Dark-themed card component with consistent styling.
+
+**Features**: Optional header and footer, tap callback, hover effects, gradient background  
+**Styling**: Deep sea gradient, rounded corners, shadow effects
+
+See `lib/core/widgets/cards/deep_sea_card.dart` for implementation details.
+
+### Text Fields (`AppTextField`)
+Styled text input component with validation support.
+
+**Features**: Label and hint text, error state, password obscuring with toggle visibility, multiline support, custom validation
+**Styling**: Orange sport accent color, consistent border radius
+**Password Toggle**: Set `enablePasswordToggle: true` with `obscureText: true` to show eye icon for password visibility toggle
+
+See `lib/core/widgets/inputs/app_text_field.dart` for implementation details.
+
+### Status Badges (`StatusBadge`)
+Visual indicators for status display.
+
+**Types**: `active`, `cancelled`, `completed`  
+**Features**: Custom label support, color-coded backgrounds
+
+See `lib/core/widgets/badges/status_badge.dart` for implementation details.
+
+### Navigation (`AppDrawer`)
+App-wide navigation drawer with user profile integration.
+
+**Features**: User profile display, navigation menu items, logout functionality, gradient background  
+**Integration**: Works with authentication service and profile service
+
+See `lib/core/widgets/navigation/app_drawer.dart` for implementation details.
+
+### Toasts (`ToastUtils`)
+Toast notification system for user feedback.
+
+**Types**: `success`, `error`, `warning`, `info`  
+**Features**: Customizable duration, color-coded by type, auto-dismiss
+
+See `lib/core/utils/toast_utils.dart` for implementation details.
+
+## Constants
+
+### API Constants (`ApiConstants`)
+Centralized API configuration for environment management.
+
+**Configuration**: Base URL switching between development and production  
+**Environments**: Localhost, Android emulator, iOS simulator, production server
+
+See `lib/core/constants/api_constants.dart` for configuration options.
+
+### App Constants (`AppConstants`)
+Application-wide constants synchronized with Django backend.
+
+**City Choices**: 107 Indonesian cities matching Django `CITY_CHOICES`  
+**Sport Choices**: 8 sports (Football, Basketball, Badminton, Tennis, Running, Cycling, Swimming, Volleyball)  
+**Skill Levels**: Beginner, Intermediate, Advanced
+
+**Helper Methods**: Display name getters, sorted lists for dropdowns
+
+See `lib/core/constants/app_constants.dart` for complete lists and utilities.
+
+## Theme Configuration
+
+The app theme is configured in `lib/app/app_theme.dart` and applied globally in `main.dart`.
+
+**Theme Features**:
+- Material Design 3 support
+- Custom color scheme based on AppColors
+- Consistent typography scale
+- Styled input decoration theme
+- Card theme with deep sea styling
+- AppBar theme with deep sea background
+
+**Usage**: The theme is automatically applied to all widgets. Access theme colors via `Theme.of(context)` or use `AppColors` directly for design system colors.
 
 ## Design System Mapping
 
-This Flutter design system maps to the CSS classes as follows:
+This Flutter design system maps to the CSS classes from the web application as follows:
 
-| CSS Class | Flutter Widget | Notes |
-|-----------|---------------|-------|
+| CSS Class | Flutter Component | Description |
+|-----------|------------------|-------------|
 | `.btn` | `AppButton` | Base button styles |
-| `.btn-primary` | `ButtonVariant.primary` | Primary button |
-| `.btn-secondary` | `ButtonVariant.secondary` | Secondary button |
-| `.btn-outline` | `ButtonVariant.outline` | Outline button |
-| `.btn-danger` | `ButtonVariant.danger` | Danger button |
-| `.btn-success` | `ButtonVariant.success` | Success button |
-| `.btn-sm` | `ButtonSize.small` | Small button |
-| `.btn-md` | `ButtonSize.medium` | Medium button |
-| `.btn-lg` | `ButtonSize.large` | Large button |
-| `.chip` | `AppChip` | Base chip styles |
-| `.chip-primary` | `ChipVariant.primary` | Primary chip |
-| `.chip-secondary` | `ChipVariant.secondary` | Secondary chip |
-| `.chip-filled` | `ChipVariant.filled` | Filled chip |
+| `.btn-primary` | `ButtonVariant.primary` | Primary orange button |
+| `.btn-secondary` | `ButtonVariant.secondary` | Secondary gray button |
+| `.btn-outline` | `ButtonVariant.outline` | Outlined button |
+| `.btn-danger` | `ButtonVariant.danger` | Danger/delete button |
+| `.btn-success` | `ButtonVariant.success` | Success/confirm button |
+| `.btn-sm` | `ButtonSize.small` | Small button size |
+| `.btn-md` | `ButtonSize.medium` | Medium button size (default) |
+| `.btn-lg` | `ButtonSize.large` | Large button size |
+| `.chip` | `AppChip` | Base chip component |
+| `.chip-primary` | `ChipVariant.primary` | Primary chip style |
+| `.chip-secondary` | `ChipVariant.secondary` | Secondary chip style |
+| `.chip-filled` | `ChipVariant.filled` | Filled chip style |
 | `.card-deep-sea` | `DeepSeaCard` | Deep sea themed card |
-| `.status-badge` | `StatusBadge` | Status badge |
+| `.status-badge` | `StatusBadge` | Status indicator badge |
 | `.input-group` | `AppTextField` | Text input field |
 | `.toast-*` | `ToastUtils` | Toast notifications |
 
 ## Best Practices
 
+### Component Usage
 1. **Always use design system components** instead of creating custom styled widgets
-2. **Use AppColors** for consistent color usage across the app
-3. **Follow the size variants** (small, medium, large) for consistency
-4. **Use appropriate button variants** based on action importance
-5. **Show feedback** using toasts for user actions
-6. **Maintain accessibility** by providing proper labels and hints
+2. **Import from design_system.dart** for consistency and easier maintenance
+3. **Follow the established patterns** when creating new components
 
-## Contributing
+### Color Usage
+1. **Use AppColors constants** for all color references
+2. **Prefer semantic colors** (e.g., `buttonDanger` instead of raw hex values)
+3. **Use opacity variants** when available (e.g., `orangeSportWithOpacity(0.5)`)
 
-When adding new components to the design system:
+### Consistency
+1. **Follow size variants** (small, medium, large) across all components
+2. **Use appropriate button variants** based on action importance and context
+3. **Maintain spacing consistency** using standard padding/margin values
 
-1. Follow the existing naming conventions
-2. Add comprehensive documentation
-3. Update this README with usage examples
-4. Add the component to `design_system_demo.dart`
-5. Ensure consistency with the CSS design system
+### User Feedback
+1. **Show toast notifications** for user actions (success, error, warning, info)
+2. **Use loading states** for async operations
+3. **Provide clear error messages** in form fields
+
+### Accessibility
+1. **Provide proper labels** for all input fields
+2. **Use semantic colors** that convey meaning
+3. **Ensure sufficient contrast** for text readability
+
+### Constants
+1. **Use AppConstants** for cities, sports, and skill levels
+2. **Never hardcode** values that exist in constants
+3. **Keep constants synchronized** with Django backend
+
+### API Configuration
+1. **Use ApiConstants.baseUrl** for all API calls
+2. **Switch environments** by changing the baseUrl value
+3. **Never hardcode** API URLs in feature code
+
+---
+
+**For detailed implementation examples and code, refer to the actual component files in the codebase.**

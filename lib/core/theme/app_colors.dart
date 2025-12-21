@@ -69,7 +69,7 @@ class AppColors {
   static const Color toastInfoBorder = Color(0xFF1E40AF);
 
   // ===== NEUTRAL COLORS =====
-  
+
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
   static const Color gray50 = Color(0xFFF9FAFB);
@@ -82,6 +82,9 @@ class AppColors {
   static const Color gray700 = Color(0xFF374151);
   static const Color gray800 = Color(0xFF1F2937);
   static const Color gray900 = Color(0xFF111827);
+
+  /// Dark gray background color
+  static const Color darkGrayBackground = Color(0xFF5B6372);
 
   // ===== UTILITY COLORS =====
 
