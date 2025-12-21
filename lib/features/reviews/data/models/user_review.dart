@@ -1,7 +1,7 @@
 class UserReview {
   final int id;
   final String eventTitle;
-  final String reviewerName; // Nama orang yang memberi nilai
+  final String reviewerName; 
   final int rating;
   final String comment;
   final String createdAt;
