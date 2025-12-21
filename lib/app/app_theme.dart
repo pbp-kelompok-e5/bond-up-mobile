@@ -25,7 +25,7 @@ class AppTheme {
       ),
       
       // Scaffold background
-      scaffoldBackgroundColor: AppColors.white,
+      scaffoldBackgroundColor: AppColors.darkGrayBackground,
       
       // AppBar theme
       appBarTheme: const AppBarTheme(

@@ -6,9 +6,12 @@ import 'package:pbp_django_auth/pbp_django_auth.dart' show CookieRequest;
 import '../models/participant.dart';
 import '../services/event_service.dart';
 
+/// Layar untuk menampilkan dan mengelola daftar peserta untuk acara tertentu.
 class ParticipantsPage extends StatefulWidget {
+  /// ID acara yang pesertanya akan ditampilkan.
   final int eventId;
 
+  /// Membuat [ParticipantsPage] untuk [eventId] yang diberikan.
   const ParticipantsPage({super.key, required this.eventId});
 
   @override
@@ -16,17 +19,23 @@ class ParticipantsPage extends StatefulWidget {
 }
 
 class _ParticipantsPageState extends State<ParticipantsPage> {
+  /// Layanan (service) untuk pemanggilan API terkait acara.
   late EventService service;
+
+  /// Future yang akan menampung daftar peserta yang diambil dari API.
   late Future<List<Participant>> _participantsFuture;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Inisialisasi EventService menggunakan CookieRequest dari context.
     final req = context.watch<CookieRequest>();
     service = EventService(req);
+    // Mengambil data peserta saat dependensi berubah.
     _participantsFuture = service.fetchParticipants(widget.eventId);
   }
 
+  /// Memuat ulang daftar peserta dengan mengambil data kembali dari API.
   void _reload() {
     setState(() {
       _participantsFuture = service.fetchParticipants(widget.eventId);
@@ -42,9 +51,11 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
       body: FutureBuilder<List<Participant>>(
         future: _participantsFuture,
         builder: (context, snap) {
+          // Menampilkan indikator pemuatan saat mengambil data peserta.
           if (snap.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
+          // Menampilkan pesan jika tidak ada peserta atau terjadi kesalahan.
           if (snap.hasError || !snap.hasData || snap.data!.isEmpty) {
             return Center(
               child: Column(
@@ -71,6 +82,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               separatorBuilder: (context, index) => const Divider(indent: 16, endIndent: 16),
               itemBuilder: (_, i) {
+                // Membangun ubin (tile) untuk setiap peserta.
                 return _buildParticipantTile(data[i]);
               },
             ),
@@ -80,6 +92,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     );
   }
 
+  /// Membangun widget [ListTile] untuk menampilkan informasi satu peserta.
   Widget _buildParticipantTile(Participant participant) {
     final theme = Theme.of(context);
     final username = participant.username;
@@ -96,6 +109,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 4),
+          // Menampilkan status peserta dalam bentuk chip berwarna.
           _buildStatusChip(status),
           const SizedBox(height: 4),
           Text(
@@ -104,56 +118,57 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
           ),
         ],
       ),
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) => _handleAction(value, participant),
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: "remove",
-            child: ListTile(
-              leading: Icon(Icons.person_remove, color: AppColors.buttonDanger),
-              title: Text("Remove"),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (status == 'joined')
+            IconButton(
+              icon: const Icon(Icons.check_circle),
+              color: AppColors.statusCompleted,
+              tooltip: "Mark Attended",
+              onPressed: () => _handleAction('mark_attended', participant),
             ),
+          if (status == 'attended')
+            IconButton(
+              icon: const Icon(Icons.undo),
+              color: AppColors.toastWarningEnd,
+              tooltip: "Unmark Attended",
+              onPressed: () => _handleAction('unmark_attended', participant),
+            ),
+          IconButton(
+            icon: const Icon(Icons.person_remove),
+            color: AppColors.buttonDanger,
+            tooltip: "Remove Participant",
+            onPressed: () => _handleAction('remove', participant),
           ),
-          if (status == 'approved')
-            const PopupMenuItem(
-              value: "mark_attended",
-              child: ListTile(
-                leading: Icon(Icons.check_circle, color: AppColors.statusCompleted),
-                title: Text("Mark Attended"),
-              ),
-            ),
         ],
       ),
     );
   }
 
+  /// Membangun widget chip berwarna untuk menampilkan status peserta.
   Widget _buildStatusChip(String status) {
     Color chipColor;
-    Color textColor;
     String label = status.replaceAll('_', ' ').toUpperCase();
 
     switch (status) {
       case 'approved':
         chipColor = AppColors.statusActiveBackground;
-        textColor = AppColors.statusActive;
         break;
       case 'attended':
         chipColor = AppColors.statusCompletedBackground;
-        textColor = AppColors.statusCompleted;
         break;
       case 'pending':
-        chipColor = AppColors.toastWarningEnd.withOpacity(0.2);
-        textColor = AppColors.toastWarningEnd;
+        chipColor = AppColors.toastWarningEnd.withValues(alpha: 0.2);
         break;
       default:
         chipColor = AppColors.gray200;
-        textColor = AppColors.gray700;
     }
 
     return Chip(
       label: Text(label),
-      labelStyle: TextStyle(
-        color: textColor,
+      labelStyle: const TextStyle(
+        color: AppColors.deepSea,
         fontWeight: FontWeight.bold,
         fontSize: 10,
       ),
@@ -163,6 +178,9 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
     );
   }
 
+  /// Menangani aksi yang dilakukan pada peserta (hapus, tandai hadir).
+  ///
+  /// Menampilkan dialog konfirmasi sebelum menjalankan aksi tersebut.
   void _handleAction(String action, Participant participant) async {
     String title;
     String content;
@@ -179,6 +197,11 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
       content = 'Are you sure you want to mark ${participant.username} as attended?';
       confirmText = 'Mark Attended';
       isDestructive = false;
+    } else if (action == 'unmark_attended') {
+      title = 'Unmark Attended?';
+      content = 'Are you sure you want to unmark ${participant.username} as attended?';
+      confirmText = 'Unmark';
+      isDestructive = false;
     } else {
       return;
     }
@@ -192,15 +215,21 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
 
     if (!confirm || !mounted) return;
 
+    // Memanggil layanan untuk mengelola peserta.
     final res = await service.manageParticipant(widget.eventId, action, participant.userId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res["message"] ?? "Action successful!")),
       );
+      // Memuat ulang daftar peserta setelah aksi berhasil dilakukan.
       _reload();
     }
   }
 
+  /// Menampilkan dialog konfirmasi umum.
+  ///
+  /// Menerima [title], [content], serta [confirmText] dan flag [isDestructive] opsional.
+  /// Mengembalikan `true` jika pengguna mengonfirmasi, dan `false` jika tidak.
   Future<bool> _showConfirmationDialog({
     required String title,
     required String content,

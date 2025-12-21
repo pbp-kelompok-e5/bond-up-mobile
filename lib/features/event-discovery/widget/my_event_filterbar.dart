@@ -1,4 +1,3 @@
-import 'package:bond_up_mobile/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
@@ -399,6 +398,8 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       },
     );
 
+    if (!context.mounted) return;
+    
     // Jika user memilih tanggal (tidak cancel)
     if (pickedRange != null) {
       setState(() {
@@ -431,7 +432,7 @@ class _FilterChipButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : Colors.grey.shade100, // TODO UPDATE
+          color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey.shade300),
         ),

@@ -393,6 +393,10 @@ class _FilterBarSectionState extends State<FilterBarSection> {
       },
     );
 
+    // Cek apakah widget/context masih valid setelah proses await selesai.
+    // Jika user sudah menutup layar sebelumnya, hentikan eksekusi.
+    if (!context.mounted) return;
+
     // Jika user memilih tanggal (tidak cancel)
     if (pickedRange != null) {
       setState(() {

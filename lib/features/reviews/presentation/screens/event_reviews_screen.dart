@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:bond_up_mobile/core/design_system.dart'; 
+import 'package:bond_up_mobile/core/design_system.dart';
 import 'package:bond_up_mobile/features/reviews/data/models/review_participant.dart';
+import 'package:bond_up_mobile/core/constants/api_constants.dart';
 
 class EventReviewsPage extends StatefulWidget {
   final int eventId;
@@ -37,9 +38,7 @@ class _EventReviewsPageState extends State<EventReviewsPage> {
 
   Future<void> _fetchParticipants() async {
     final request = context.read<CookieRequest>();
-    // GUNAKAN 10.0.2.2 UNTUK ANDROID EMULATOR
-    const baseUrl = 'http://localhost:8000'; 
-    final url = '$baseUrl/reviews/api/event/${widget.eventId}/participants/';
+    final url = '${ApiConstants.baseUrl}/reviews/api/event/${widget.eventId}/participants/';
 
     try {
       final response = await request.get(url);
@@ -81,7 +80,7 @@ class _EventReviewsPageState extends State<EventReviewsPage> {
 
     try {
       final response = await request.post(
-  'http://localhost:8000/reviews/ajax/event/${widget.eventId}/create/', // Samakan dengan fetch
+  '${ApiConstants.baseUrl}/reviews/ajax/event/${widget.eventId}/create/',
   formData,
 );
 
