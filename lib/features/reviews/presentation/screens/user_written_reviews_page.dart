@@ -192,6 +192,16 @@ class _UserWrittenReviewsPageState extends State<UserWrittenReviewsPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
+                        review.eventTitle.length.toString(),
+                        style: TextStyle(
+                          color: review.eventTitle.length > 100 ? Colors.red : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
                         review.createdAt,
                         style: const TextStyle(color: AppColors.gray500, fontSize: 12),
                       ),
